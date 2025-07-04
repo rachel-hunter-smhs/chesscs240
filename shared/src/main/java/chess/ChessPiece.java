@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class ChessPiece {
     private final ChessGame.TeamColor teamColor;
     private final PieceType pieceType;
-    private final ChessPiece[][] squares = new ChessPiece[8][8];
+
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.teamColor = pieceColor;
@@ -88,7 +88,7 @@ public class ChessPiece {
             case KNIGHT -> {
                 int[][] d = {{ 2, 1}, { 1, 2}, {-1, 2}, {-2, 1},
                         {-2,-1}, {-1,-2}, { 1,-2}, { 2,-1}};
-                from = myPosition;
+                //ChessPosition from = myPosition;
                 for (int[] s : d) {
                     int r = row + s[0], c = col + s[1];
                     if (inBounds(r, c)) {
@@ -161,10 +161,10 @@ public class ChessPiece {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ChessPiece)) return false;
-        ChessPiece that = (ChessPiece) o;
+        if (!(o instanceof ChessPiece that)) return false;
         return teamColor == that.teamColor && pieceType == that.pieceType;
     }
+
 
     @Override
     public int hashCode() {
