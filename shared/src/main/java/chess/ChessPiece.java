@@ -121,5 +121,27 @@ public class ChessPiece {
             moves.add(new ChessMove(from, to, null));
         }
     }
+    private void slide (ChessBoard board, ChessPosition from, Collection<ChessMove> moves, int [][] dirs){
+        int row = from.getRow(), col = from.getColumn();
+        for(int [] d : dirs){
+            int r = row + d[0], c = col + d[1];
+            while (inBounds(r,c)){
+                ChessPosition to = new ChessPosition(r, c);
+                ChessPosition tgt = board.getPiece(to);
+                if (tgt == null){
+                    moves.add(new ChessMove(from, to, null));
+                }else {
+                    if (tgt.teamColor != teamColor)
+                        moves.add(new ChessMove(from, to, null));
+                    break;
+                }
+                r += d[0];
+                c += d[1];
+            }
+        }
+    }
+    private boolean inBounds (int r, int c){
+        return r >= 1 && r <= 8 && c >= 1 && c <= 8;
+    }
 
 }
