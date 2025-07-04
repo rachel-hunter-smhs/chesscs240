@@ -55,5 +55,54 @@ public class ChessPiece {
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         ChessPosition from myPosition;
+
+        switch (pieceType){
+            case PAWN -> {
+                int dir = (teamColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+                int startRow = (teamColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+                int nextRow = row + dir;
+
+                if(inBounds(nextRow, col) && board.getPiece(new ChessPosition(nextRow, col)) == null){
+                    addPawnAdvance(moves, from new ChessPosition(nextRow, col));
+                    if (row == startRow){
+                        int jumpRow = row + 2 * dir;
+                        if(board.getPiece(new ChessPosition(jumpRow, col)) == null)
+                            moves.add(new ChessMove(from, new ChessPosition(jumpRow, col), null));
+                    }
+                }
+
+                for(int dc : new int[]{-1,1}){
+                    int captureCol = col + dc;
+                    if (inBounds(nextRow, captureCol)){
+                        ChessPiece target = board.getPiece(new ChessPosition(nextRow, captureCol));
+                        if (target != null && target.teamColor != teamColor)
+                            addPawnAdvance(moves, from, new ChessPosition(nextRow, captureCol));
+                    }
+                }
+            }
+            case KNIGHT -> {
+                int[][] d = {{2,1}, {1,2}, {-1,2}, {-2,1}, {-2, -1}, {-1,-2}, {1,-2}, {2,-1}};
+                for (int[] s : d){
+                    int r = row + s[0], c = col + s[1];
+                    if(inBounds(r,c)){
+                        ChessPiece tgt = board.getPiece(new ChessPosition(r,c), null);
+                    }
+                }
+            }
+            case KING -> {
+                for (int dr = -1; dr <= 1; dr ++)
+                    for(int dc = -1; dc <= 1; dc++)
+                        if(dr != 0 || dc !=0){
+                            int r = row + dr, c = col + dc;
+                            if (inBounds(r,c)){
+                                ChessPiece tgt = board.getPiece(new ChessPosition(r,c));
+                                if (tgt == null || tgt.teamColor != teamColor)
+                                    moves.add(new ChessMove(from, new ChessPosition(r,c), null));
+                            }
+                        }
+            }
+            case BISHOP -> slide(board, from, moves, new int[][]{{1,1}, {1,-1}, {-1,1}, {-1,-1}});
+            case ROOK -> slide(board, from, moves, new int[][]{{}})
+        }
     }
 }
