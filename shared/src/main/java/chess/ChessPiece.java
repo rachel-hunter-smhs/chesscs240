@@ -102,7 +102,24 @@ public class ChessPiece {
                         }
             }
             case BISHOP -> slide(board, from, moves, new int[][]{{1,1}, {1,-1}, {-1,1}, {-1,-1}});
-            case ROOK -> slide(board, from, moves, new int[][]{{}})
+            case ROOK -> slide(board, from, moves, new int[][]{{1,0}, {-1,0}, {0,1}, {0,-1}});
+            case QUEEN -> slide(board, from, moves, new int[][]{
+                    {1,0}, {-1,0}, {0,1}, {0,-1},
+                    {1,1}, {1,-1}, {-1,1}, {-1,-1}});
+
+        }
+        return moves;
+    }
+    private void addPawnAdvance(Collection<ChessMove> moves, ChessPosition from, ChessPosition to){
+        int promoRow = ( teamColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
+        if (to.getRow() == promoRow){
+            moves.add(new ChessMove(from, to, PieceType.QUEEN));
+            moves.add(new ChessMove(from, to, PieceType.ROOK));
+            moves.add(new ChessMove(from, to, PieceType.BISHOP));
+            moves.add(new ChessMove(from, to, PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(from, to, null));
         }
     }
+
 }
