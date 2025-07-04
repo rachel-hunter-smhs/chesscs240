@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Objects;
+import chess.ChessPiece.PieceType;
 
 /**
  * Represents moving a chess piece on a chessboard
@@ -11,10 +12,10 @@ import java.util.Objects;
 public class ChessMove {
     private final ChessPosition startPosition;
     private final ChessPosition endPosition;
-    private final ChessPosition.Piecetype promotionPiece;
+    private final ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
-                     Piecetype promotionPiece) {
+                     PieceType promotionPiece) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.promotionPiece = promotionPiece;
