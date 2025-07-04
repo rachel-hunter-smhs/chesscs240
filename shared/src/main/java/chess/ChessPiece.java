@@ -1,6 +1,6 @@
 package chess;
 
-import java.sql.PreparedStatement;
+//import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.ArrayList;
 /**
