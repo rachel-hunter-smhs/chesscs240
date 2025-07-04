@@ -58,7 +58,7 @@ public class ChessGame {
        if (piece == null) return null;
        if (piece.getTeamColor() != teamTurn) return List.of();
        List<ChessMove> legal = new ArrayList<>();
-       for(ChessMove m: piece.pieceMoces(board, startPosition)){
+       for(ChessMove m: piece.pieceMoves(board, startPosition)){
            ChessBoard copy = duplicateBoard();
            applyMove(copy,m);
            if(!inCheck(copy, piece.getTeamColor())) legal.add(m);
