@@ -86,14 +86,19 @@ public class ChessPiece {
                 }
             }
             case KNIGHT -> {
-                int[][] d = {{2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {-2, -1}, {-1, -2}, {1, -2}, {2, -1}};
+                int[][] d = {{ 2, 1}, { 1, 2}, {-1, 2}, {-2, 1},
+                        {-2,-1}, {-1,-2}, { 1,-2}, { 2,-1}};
+                from = myPosition;
                 for (int[] s : d) {
                     int r = row + s[0], c = col + s[1];
                     if (inBounds(r, c)) {
                         ChessPiece tgt = board.getPiece(new ChessPosition(r, c));
+                        if (tgt == null || tgt.getTeamColor() != teamColor)
+                            moves.add(new ChessMove(from, new ChessPosition(r, c), null));
                     }
                 }
             }
+
             case KING -> {
                 for (int dr = -1; dr <= 1; dr++)
                     for (int dc = -1; dc <= 1; dc++)

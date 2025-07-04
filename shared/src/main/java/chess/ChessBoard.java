@@ -63,4 +63,16 @@ public class ChessBoard {
             addPiece(new ChessPosition(8,c), new ChessPiece(black, back[c-1]));
         }
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChessBoard)) return false;
+        return java.util.Arrays.deepEquals(squares, ((ChessBoard) o).squares);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Arrays.deepHashCode(squares);
+    }
+
 }
