@@ -1,4 +1,8 @@
 package server.dataaccess;
 
-public class MemoryDataAccess {
+public class MemoryDataAccess implements DataAccess {
+    @Override
+    public void clear() {
+
+    }
 }

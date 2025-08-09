@@ -1,4 +1,4 @@
 package server.dataaccess;
 
-public class DataAccess {
+public interface DataAccess { void clear();
 }
