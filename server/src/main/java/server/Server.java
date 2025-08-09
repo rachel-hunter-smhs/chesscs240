@@ -8,6 +8,7 @@ import server.service.ClearService;
 import server.service.UserService;
 import spark.Response;
 import spark.Spark;
+import server.service.GameService;
 
 public class Server {
     private final Gson gson = new Gson();
@@ -19,6 +20,7 @@ public class Server {
         var dao   = new MemoryDataAccess();
         var clear = new ClearService(dao);
         var users = new UserService(dao);
+        var games = new GameService(dao);
 
         Spark.delete("/db",(req,res)-> ok(res,()->{ clear.clear(); return new JsonObject(); }));
 
@@ -32,9 +34,25 @@ public class Server {
             users.logout(new UserService.LogoutRequest(req.headers("authorization")));
             return new JsonObject();
         }));
+        Spark.get("/game",(req,res)-> handle(res,
+                ()-> games.list(new GameService.ListRequest(req.headers("authorization")))));
+
+        record NameOnly(String gameName){}
+        Spark.post("/game",(req,res)-> handle(res, ()-> {
+            var b = gson.fromJson(req.body(), NameOnly.class);
+            return games.create(new GameService.CreateRequest(b.gameName(), req.headers("authorization")));
+        }));
+
+        record JoinBody(String playerColor,int gameID){}
+        Spark.put("/game",(req,res)-> ok(res, ()-> {
+            var b = gson.fromJson(req.body(), JoinBody.class);
+            games.join(new GameService.JoinRequest(req.headers("authorization"), b.playerColor(), b.gameID()));
+            return new JsonObject();
+        }));
 
         Spark.awaitInitialization();
         return Spark.port();
+
     }
 
     public void stop(){ Spark.stop(); Spark.awaitStop(); }
