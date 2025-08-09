@@ -35,10 +35,10 @@ public class ChessBoard {
                 ChessPiece.PieceType.ROOK,
         };
         for (int c = 1; c<=8; c++ ){
-            addPiece(new ChessPosition(2,c), new ChessPiece(white, ChessPiece.PieceType.PAWN));
-            addPiece(new ChessPosition(7,c), new ChessPiece(black, ChessPiece.PieceType.PAWN));
-            addPiece(new ChessPosition(1,c), new ChessPiece(white, back[c-1]));
-            addPiece(new ChessPosition(8,c), new ChessPiece(black, back[c-1]));
+            addPiece(new ChessPosition(2, c), new ChessPiece(white, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(7, c), new ChessPiece(black, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(1, c), new ChessPiece(white, back[c-1]));
+            addPiece(new ChessPosition(8, c), new ChessPiece(black, back[c-1]));
         }
     }
 
