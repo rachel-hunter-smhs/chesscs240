@@ -5,7 +5,7 @@ import chess.ChessPiece.PieceType;
 
 public record ChessMove(ChessPosition startPosition, ChessPosition endPosition, PieceType promotionPiece) {
     public ChessPosition getStartPosition() { return startPosition; }
-    public ChessPosition getEndPosition() { return endPosition; }
+    public ChessPosition getEndPosition() { return endPosition }
     public PieceType getPromotionPiece() { return promotionPiece; }
 
     @Override
