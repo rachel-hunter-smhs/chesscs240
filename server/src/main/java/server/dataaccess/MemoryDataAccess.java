@@ -1,4 +1,4 @@
-package dataaccess;
+package server.dataaccess;
 
 public class MemoryDataAccess {
 }
