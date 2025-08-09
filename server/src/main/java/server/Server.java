@@ -1,32 +1,22 @@
 package server;
-//import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
+
 import server.dataaccess.MemoryDataAccess;
-import service.ClearService;
-//import service.GameService;
-//import service.UserService;
-import spark.*;
+import server.service.ClearService;
+import spark.Spark;
 
 public class Server {
-
-    public int run(int desiredPort) {
-        Spark.port(desiredPort);
-
+    public int run(int port) {
+        Spark.port(port);
         Spark.staticFiles.location("web");
 
         var dao = new MemoryDataAccess();
+        var clear = new ClearService(dao);
 
-        // Register your endpoints and handle exceptions here.
-
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
+        Spark.delete("/db", (req, res) -> { clear.clear(); res.status(200); return "{}"; });
+        Spark.get("/ping", (req, res) -> "pong");
 
         Spark.awaitInitialization();
         return Spark.port();
     }
-
-    public void stop() {
-        Spark.stop();
-        Spark.awaitStop();
-    }
+    public void stop(){ Spark.stop(); Spark.awaitStop(); }
 }
