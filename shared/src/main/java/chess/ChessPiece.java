@@ -125,7 +125,7 @@ public class ChessPiece {
         }
     }
 
-    private boolean inBounds(int r, int c) {
+    private boolean inBounds(int r, int c){
         return r >= 1 && r <= 8 && c >= 1 && c <= 8;
     }
 
