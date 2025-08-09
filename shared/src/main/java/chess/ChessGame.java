@@ -221,7 +221,7 @@ public class ChessGame {
         int moveDistance = Math.abs(lastMove.endPosition().getRow() - lastMove.startPosition().getRow());
         if (moveDistance != 2) return enPassantMoves;
 
-        if (Math.abs(pawnPos.getColumn()- lastMove.endPosition().getColumn()) != 1) {
+        if (Math.abs(pawnPos.getColumn() - lastMove.endPosition().getColumn()) != 1) {
             return enPassantMoves;
         }
 
