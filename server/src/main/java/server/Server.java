@@ -1,7 +1,8 @@
 package server;
 //import dataaccess.DataAccessException;
-//import dataaccess.MemoryDataAccess;
-//import service.ClearService;
+import dataaccess.MemoryDataAccess;
+import server.dataaccess.MemoryDataAccess;
+import service.ClearService;
 //import service.GameService;
 //import service.UserService;
 import spark.*;
@@ -12,6 +13,8 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        var dao = new MemoryDataAccess();
 
         // Register your endpoints and handle exceptions here.
 
