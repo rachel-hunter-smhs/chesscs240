@@ -76,7 +76,7 @@ public class Server {
             case "already taken" -> res.status(403);
             default -> res.status(500);
         }
-        return "{\"message\":\"Error: "+m+"\"}";
+        return "{\"message\":\"Error: " + m + "\"}";
     }
     private String safe(String s){ return s==null? "" : s.replace("\"","'"); }
 }
