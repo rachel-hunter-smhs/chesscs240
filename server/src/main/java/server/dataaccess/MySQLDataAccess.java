@@ -74,12 +74,37 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void createAuth(AuthData a) {
-        auths.put(a.authToken(), a);
+        String sql = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
+        try (Connection conn = DatabaseManager.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)){
+            stmt.setString(1,a.authToken());
+            stmt.setString(2, a.username());
+            stmt.executeUpdate();
+        } catch (SQLException | DataAccessException e){
+            throw new RuntimeException("Database error", e);
+        }
     }
 
     @Override
     public AuthData getAuth(String token) {
-        return auths.get(token);
+        String sql = "SELECT authToken, username FROM auth WHERE authToken = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1,token);
+            try (ResultSet rs = stmt.executeQuery()){
+                if(rs.next()){
+                    return new AuthData(
+                            rs.getString("authToken"),
+                            rs.getString("username"));
+
+                }
+                return null;
+            }
+
+        } catch (SQLException | DataAccessException e){
+            throw new RuntimeException("Database error", e);
+        }
+
     }
 
     @Override
