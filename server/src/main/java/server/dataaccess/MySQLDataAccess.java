@@ -5,6 +5,7 @@ import com.google.protobuf.RpcUtil;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class MySQLDataAccess implements DataAccess{
         Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("DELETE FROM auth");
             stmt.executeUpdate("DELETE FROM games");
-            stmt.executeUpdate("DELETE FROM games");
+            stmt.executeUpdate("DELETE FROM users");
         } catch (SQLException | DataAccessException e) {
             throw new RuntimeException("Database clear failed", e);
         }
@@ -40,9 +41,11 @@ public class MySQLDataAccess implements DataAccess{
                     }
                 }
             }
+            String hashed = BCrypt.hashpw(u.password(), BCrypt.gensalt());
+
             try(PreparedStatement stmt = conn.prepareStatement(insertSql)){
                 stmt.setString(1, u.username());
-                stmt.setString(2, u.password());
+                stmt.setString(2, hashed);
                 stmt.setString(3, u.email());
                 stmt.executeUpdate();
             }
@@ -110,7 +113,7 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void deleteAuth(String token) {
-        String sql = "DELETE FROM auth WHERE authToke = ?";
+        String sql = "DELETE FROM auth WHERE authToken = ?";
         try (Connection conn = DatabaseManager.getConnection();
         PreparedStatement stmt =conn.prepareStatement(sql)){
             stmt.setString(1, token);
@@ -125,14 +128,16 @@ public class MySQLDataAccess implements DataAccess{
         if (gameName == null || gameName.isBlank()) {
             throw new DataAccessException("bad request");
         }
-       String sql = "INSERT INTO games (gameName, whiteUsername, blackUsername, gameState) VALUES (?, NULL, NULL, ?)";
+       String sql = "INSERT INTO games (gameName, whiteUsername, blackUsername, gameState) VALUES (?, ?, ?, ?)";
         ChessGame game = new ChessGame();
         String gameStateJson = gson.toJson(game);
 
         try(Connection conn = DatabaseManager.getConnection();
         PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             stmt.setString(1, gameName);
-            stmt.setString(2, gameStateJson);
+            stmt.setNull(2, Types.VARCHAR);
+            stmt.setNull(3,Types.VARCHAR);
+            stmt.setString(4, gameStateJson);
             stmt.executeUpdate();
 
             try(ResultSet keys = stmt.getGeneratedKeys()){
@@ -214,11 +219,24 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void saveGame(GameData g) throws DataAccessException {
-        if (!games.containsKey(g.gameID())) {
-            throw new DataAccessException("bad request");
-        }
-        games.put(g.gameID(), g);
+       String sql =  "UPDATE games SET gameName = ?, whiteUsername = ?, blackUsername = ?, gameState = ? WHERE id = ?";
+       String gameStateJson = gson.toJson(g.game());
+
+       try (Connection conn = DatabaseManager.getConnection();
+       PreparedStatement stmt = conn.prepareStatement(sql)){
+           stmt.setString(1,g.gameName());
+           stmt.setString(2,g.whiteUsername());
+           stmt.setString(3,g.blackUsername());
+           stmt.setString(4,gameStateJson);
+           stmt.setInt(5,g.gameID());
+           int updated = stmt.executeUpdate();
+           if (updated == 0){
+               throw new DataAccessException("bad request");
+           }
+       } catch (SQLException e){
+           throw new DataAccessException("Database error", e);
+       }
     }
 }
 
-}
+

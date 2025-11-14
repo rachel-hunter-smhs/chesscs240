@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import server.dataaccess.DataAccessException;
 import server.dataaccess.MemoryDataAccess;
+import server.dataaccess.MySQLDataAccess;
 import server.service.ClearService;
 import server.service.UserService;
 import spark.Response;
@@ -17,7 +18,7 @@ public class Server {
         Spark.port(port);
         Spark.staticFiles.location("web");
 
-        var dao   = new MemoryDataAccess();
+        var dao   = new MySQLDataAccess();
         var clear = new ClearService(dao);
         var users = new UserService(dao);
         var games = new GameService(dao);

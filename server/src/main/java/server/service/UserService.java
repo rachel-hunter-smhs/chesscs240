@@ -5,6 +5,7 @@ import server.dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import java.util.UUID;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     private final DataAccess dao;
@@ -25,7 +26,7 @@ public class UserService {
     public LoginResult login(LoginRequest r) throws DataAccessException {
         if(r==null||r.username()==null||r.password()==null) throw new DataAccessException("bad request");
         var u = dao.getUser(r.username());
-        if(u==null||!u.password().equals(r.password())) throw new DataAccessException("unauthorized");
+        if(u==null||!BCrypt.checkpw(r.password(),u.password())) throw new DataAccessException("unauthorized");
         String t = UUID.randomUUID().toString();
         dao.createAuth(new AuthData(t,u.username()));
         return new LoginResult(u.username(),t);
