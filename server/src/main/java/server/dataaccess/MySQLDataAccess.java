@@ -1,6 +1,7 @@
 package server.dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.protobuf.RpcUtil;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -109,7 +110,14 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void deleteAuth(String token) {
-        auths.remove(token);
+        String sql = "DELETE FROM auth WHERE authToke = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+        PreparedStatement stmt =conn.prepareStatement(sql)){
+            stmt.setString(1, token);
+            stmt.executeUpdate();
+        } catch (SQLException | DataAccessException e){
+            throw new RuntimeException("Database error", e);
+        }
     }
 
     @Override
@@ -117,19 +125,91 @@ public class MySQLDataAccess implements DataAccess{
         if (gameName == null || gameName.isBlank()) {
             throw new DataAccessException("bad request");
         }
-        int id = seq.getAndIncrement();
-        games.put(id, new GameData(id, null, null, gameName, new ChessGame()));
-        return id;
+       String sql = "INSERT INTO games (gameName, whiteUsername, blackUsername, gameState) VALUES (?, NULL, NULL, ?)";
+        ChessGame game = new ChessGame();
+        String gameStateJson = gson.toJson(game);
+
+        try(Connection conn = DatabaseManager.getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            stmt.setString(1, gameName);
+            stmt.setString(2, gameStateJson);
+            stmt.executeUpdate();
+
+            try(ResultSet keys = stmt.getGeneratedKeys()){
+                if(keys.next()){
+                    return keys.getInt(1);
+                } else{
+                    throw new DataAccessException("Database error");
+                }
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Database error", e);
+        }
     }
 
     @Override
     public GameData getGame(int id) {
-        return games.get(id);
+       String sql = "SELECT id, gameName, whiteUsername, blackUsername, gameState FROM games WHERE id = ?";
+       try (Connection conn = DatabaseManager.getConnection();
+       PreparedStatement stmt = conn.prepareStatement(sql)){
+           stmt.setInt(1, id);
+           try (ResultSet rs = stmt.executeQuery()){
+               if(!rs.next()){
+                   return  null;
+               }
+               String gameStateJson = rs.getString("gameState");
+               ChessGame game;
+               try {
+                   game = gson.fromJson(gameStateJson, ChessGame.class);
+                   if (game == null){
+                       game = new ChessGame();
+                   }
+               } catch (Exception e){
+                   game = new ChessGame();
+               }
+               return new GameData(
+                       rs.getInt("id"),
+                       rs.getString("whiteUsername"),
+                       rs.getString("blackUsername"),
+                       rs.getString("gameName"),
+                       game);
+
+           }
+       } catch (SQLException | DataAccessException e){
+           throw  new RuntimeException("Database error", e);
+       }
     }
 
     @Override
     public List<GameData> listGames() {
-        return new ArrayList<>(games.values());
+       String sql = "SELECT id, gameName, whiteUsername, blackUsername, gameState FROM games";
+       List<GameData> result = new ArrayList<>();
+       try (Connection conn = DatabaseManager.getConnection();
+       PreparedStatement stmt = conn.prepareStatement(sql);
+       ResultSet rs = stmt.executeQuery()){
+
+           while (rs.next()){
+               String gameStateJson = rs.getString("gameState");
+               ChessGame game;
+               try{
+                   game = gson.fromJson(gameStateJson, ChessGame.class);
+                   if (game == null){
+                       game = new ChessGame();
+                   }
+               } catch (Exception e){
+                   game = new ChessGame();
+               }
+               result.add(new GameData(
+                       rs.getInt("id"),
+                       rs.getString("whiteUsername"),
+                       rs.getString("blackUsername"),
+                       rs.getString("gameName"),
+                       game));
+           }
+           return result;
+       } catch (SQLException | DataAccessException e){
+           throw new RuntimeException("Database error", e);
+       }
     }
 
     @Override
