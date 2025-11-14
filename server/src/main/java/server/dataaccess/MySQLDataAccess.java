@@ -31,12 +31,24 @@ public class MySQLDataAccess implements DataAccess{
         String checkSql = "SELECT username FROM users WHERE username = ?";
         String insertSql = "INSERT INTO users (username, passwordHash, email) VALUES (?,?,?)";
         try (Connection conn = DatabaseManager.getConnection()){
+            try (PreparedStatement check = conn.prepareStatement(checkSql)){
+                check.setString(1, u.username());
+                try (ResultSet rs = check.executeQuery()){
+                    if (rs.next()){
+                        throw new DataAccessException("already taken");
+                    }
+                }
+            }
+            try(PreparedStatement stmt = conn.prepareStatement(insertSql)){
+                stmt.setString(1, u.username());
+                stmt.setString(2, u.password());
+                stmt.setString(3, u.email());
+                stmt.executeUpdate();
+            }
 
+        } catch (SQLException e) {
+            throw new DataAccessException("Database error",e);
         }
-        if (users.containsKey(u.username())) {
-            throw new DataAccessException("already taken");
-        }
-        users.put(u.username(), u);
     }
 
     @Override
