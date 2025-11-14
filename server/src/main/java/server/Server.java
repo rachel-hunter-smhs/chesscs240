@@ -8,54 +8,54 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 import spark.Response;
-import spark.Spark;
+import static spark.Spark.*;
 
 public class Server {
     private final Gson gson = new Gson();
 
     public int run(int port){
-        Spark.port(port);
-        Spark.staticFiles.location("web");
+        port(port);
+        staticFiles.location("web");
 
         var dao   = new MySQLDataAccess();
         var clear = new ClearService(dao);
         var users = new UserService(dao);
         var games = new GameService(dao);
 
-        Spark.delete("/db",(req,res)-> ok(res,()->{ clear.clear(); return new JsonObject(); }));
+        delete("/db",(req,res)-> ok(res,()->{ clear.clear(); return new JsonObject(); }));
 
-        Spark.post("/user",(req,res)-> handle(res,
+        post("/user",(req,res)-> handle(res,
                 ()-> users.register(gson.fromJson(req.body(), UserService.RegisterRequest.class))));
 
-        Spark.post("/session",(req,res)-> handle(res,
+        post("/session",(req,res)-> handle(res,
                 ()-> users.login(gson.fromJson(req.body(), UserService.LoginRequest.class))));
 
-        Spark.delete("/session",(req,res)-> ok(res,()->{
+        delete("/session",(req,res)-> ok(res,()->{
             users.logout(new UserService.LogoutRequest(req.headers("authorization")));
             return new JsonObject();
         }));
-        Spark.get("/game",(req,res)-> handle(res,
+        get("/game",(req,res)-> handle(res,
                 ()-> games.list(new GameService.ListRequest(req.headers("authorization")))));
 
         record NameOnly(String gameName){}
-        Spark.post("/game",(req,res)-> handle(res, ()-> {
+        post("/game",(req,res)-> handle(res, ()-> {
             var b = gson.fromJson(req.body(), NameOnly.class);
             return games.create(new GameService.CreateRequest(b.gameName(), req.headers("authorization")));
         }));
 
         record JoinBody(String playerColor,int gameID){}
-        Spark.put("/game",(req,res)-> ok(res, ()-> {
+        put("/game",(req,res)-> ok(res, ()-> {
             var b = gson.fromJson(req.body(), JoinBody.class);
             games.join(new GameService.JoinRequest(req.headers("authorization"), b.playerColor(), b.gameID()));
             return new JsonObject();
         }));
 
-        Spark.awaitInitialization();
-        return Spark.port();
+        awaitInitialization();
+        return port();
 
     }
 
-    public void stop(){ Spark.stop(); Spark.awaitStop(); }
+    public void stop(){ stop(); awaitStop(); }
 
     private interface X<T>{ T get() throws Exception; }
 
