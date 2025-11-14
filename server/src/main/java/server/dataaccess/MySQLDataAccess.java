@@ -53,7 +53,23 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public UserData getUser(String username) {
-        return users.get(username);
+       String sql = "SELECT username, passwordHash, email FROM users WHERE username = ?";
+       try (Connection conn = DatabaseManager.getConnection();
+       PreparedStatement stmt = conn.prepareStatement(sql)){
+           stmt.setString(1, username);
+           try (ResultSet rs = stmt.executeQuery()){
+               if (rs.next()){
+                   return new UserData(
+                           rs.getString("username"),
+                           rs.getString("passwordHash"),
+                           rs.getString("email"));
+               }
+               return null;
+           }
+
+       }catch (SQLException | DataAccessException e) {
+           throw new RuntimeException("Database error", e);
+       }
     }
 
     @Override
