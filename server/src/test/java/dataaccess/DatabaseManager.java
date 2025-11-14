@@ -1,11 +1,10 @@
-package server.dataaccess;
+package dataaccess;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-import server.dataaccess.DataAccessException;
 
 /** Loads db.properties, creates DB and tables when enabled, provides connections. */
 public final class DatabaseManager {

@@ -1,7 +1,6 @@
-package server.dataaccess;
+package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
-import com.google.protobuf.RpcUtil;
 import model.AuthData;
 import model.GameData;
 import model.UserData;

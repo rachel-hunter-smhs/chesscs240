@@ -1,6 +1,6 @@
-package server.service;
+package service;
 
-import server.dataaccess.DataAccess;
+import dataaccess.DataAccess;
 
 public class ClearService {
     private final DataAccess dao;

@@ -1,7 +1,7 @@
-package server.dataaccess.mysql;
-import server.dataaccess.UserDAO;
-import server.dataaccess.DataAccessException;
-import server.dataaccess.DatabaseManager;
+package dataaccess.mysql;
+import dataaccess.UserDAO;
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import model.UserData;
 import java.sql.*;
 import java.util.ArrayList;

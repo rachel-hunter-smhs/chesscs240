@@ -1,15 +1,13 @@
-package server;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import server.dataaccess.DataAccessException;
-import server.dataaccess.MemoryDataAccess;
-import server.dataaccess.MySQLDataAccess;
-import server.service.ClearService;
-import server.service.UserService;
+import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
+import dataaccess.MySQLDataAccess;
+import service.ClearService;
+import service.UserService;
 import spark.Response;
 import spark.Spark;
-import server.service.GameService;
+import service.GameService;
 
 public class Server {
     private final Gson gson = new Gson();
