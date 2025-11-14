@@ -18,7 +18,7 @@ public class MySQLDataAccess implements DataAccess{
             stmt.executeUpdate("DELETE FROM auth");
             stmt.executeUpdate("DELETE FROM games");
             stmt.executeUpdate("DELETE FROM games");
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException("Database clear failed", e);
         }
     }
@@ -27,6 +27,11 @@ public class MySQLDataAccess implements DataAccess{
     public void createUser(UserData u) throws DataAccessException {
         if (u == null || u.username() == null || u.password() == null || u.email() == null) {
             throw new DataAccessException("bad request");
+        }
+        String checkSql = "SELECT username FROM users WHERE username = ?";
+        String insertSql = "INSERT INTO users (username, passwordHash, email) VALUES (?,?,?)";
+        try (Connection conn = DatabaseManager.getConnection()){
+
         }
         if (users.containsKey(u.username())) {
             throw new DataAccessException("already taken");
