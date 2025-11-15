@@ -7,100 +7,97 @@ import dataaccess.MySQLDataAccess;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
-import spark.Response;
-import spark.Spark;
-
-import static spark.Spark.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 
 
 public class Server {
     private final Gson gson = new Gson();
+    private final Javalin javalin;
+    private record NameOnly(String gameName) {}
+    private record JoinBody(String playerColor, int gameID) {}
 
-    public int run(int port) {
-        port(port);
-        staticFiles.location("web");
-
+    public Server(){
+        javalin = Javalin.create(config -> config.staticFiles.add("web"));
         var dao   = new MySQLDataAccess();
         var clear = new ClearService(dao);
         var users = new UserService(dao);
         var games = new GameService(dao);
-
-        delete("/db", (req, res) -> ok(res, () -> {
+        javalin.delete("/db", ctx -> ok(ctx, () -> {
             clear.clear();
             return new JsonObject();
         }));
 
-        Spark.post("/user", (req, res) -> handle(res,
-                () -> users.register(gson.fromJson(req.body(), UserService.RegisterRequest.class))));
+        javalin.post("/user", ctx -> handle(ctx,
+                () -> users.register(gson.fromJson(ctx.body(), UserService.RegisterRequest.class))));
 
-        Spark.post("/session", (req, res) -> handle(res,
-                () -> users.login(gson.fromJson(req.body(), UserService.LoginRequest.class))));
+        javalin.post("/session", ctx -> handle(ctx,
+                () -> users.login(gson.fromJson(ctx.body(), UserService.LoginRequest.class))));
 
-        Spark.delete("/session", (req, res) -> ok(res, () -> {
-            users.logout(new UserService.LogoutRequest(req.headers("authorization")));
+        javalin.delete("/session", ctx -> ok(ctx, () -> {
+            users.logout(new UserService.LogoutRequest(ctx.header("authorization")));
             return new JsonObject();
         }));
 
-        Spark.get("/game", (req, res) -> handle(res,
-                () -> games.list(new GameService.ListRequest(req.headers("authorization")))));
+        javalin.get("/game", ctx -> handle(ctx,
+                () -> games.list(new GameService.ListRequest(ctx.header("authorization")))));
 
-        record NameOnly(String gameName) {}
-        Spark.post("/game", (req, res) -> handle(res, () -> {
-            var b = gson.fromJson(req.body(), NameOnly.class);
-            return games.create(new GameService.CreateRequest(b.gameName(), req.headers("authorization")));
+        javalin.post("/game", ctx -> handle(ctx, () -> {
+            var b = gson.fromJson(ctx.body(), NameOnly.class);
+            return games.create(new GameService.CreateRequest(b.gameName(), ctx.header("authorization")));
         }));
 
-        record JoinBody(String playerColor, int gameID) {}
-        Spark.put("/game", (req, res) -> ok(res, () -> {
-            var b = gson.fromJson(req.body(), JoinBody.class);
-            games.join(new GameService.JoinRequest(req.headers("authorization"), b.playerColor(), b.gameID()));
+        javalin.put("/game", ctx -> ok(ctx, () -> {
+            var b = gson.fromJson(ctx.body(), JoinBody.class);
+            games.join(new GameService.JoinRequest(ctx.header("authorization"), b.playerColor(), b.gameID()));
             return new JsonObject();
         }));
 
-        Spark.awaitInitialization();
-        return Spark.port();
+    }
+    public int run(int wantedPort) {
+        javalin.start(wantedPort);
+        return javalin.port();
     }
 
     public void stop() {
-        Spark.awaitStop();
-        Spark.stop();
+        javalin.stop();
     }
 
     private interface X<T> { T get() throws Exception; }
 
-    private String handle(Response res, X<?> f) {
+    private void handle(Context ctx, X<?> f) {
         try {
-            res.status(200);
-            return gson.toJson(f.get());
+            ctx.status(200);
+            ctx.result(gson.toJson(f.get()));
         } catch (DataAccessException e) {
-            return mapped(res, e.getMessage());
+            mapped(ctx, e.getMessage());
         } catch (Exception e) {
-            res.status(500);
-            return "{\"message\":\"Error: " + safe(e.getMessage()) + "\"}";
+            ctx.status(500);
+            ctx.result("{\"message\":\"Error: " + safe(e.getMessage()) + "\"}");
         }
     }
 
-    private String ok(Response res, X<?> f) {
+    private void ok(Context ctx, X<?> f) {
         try {
             f.get();
-            res.status(200);
-            return "{}";
+            ctx.status(200);
+            ctx.result("{}");
         } catch (DataAccessException e) {
-            return mapped(res, e.getMessage());
+            mapped(ctx, e.getMessage());
         } catch (Exception e) {
-            res.status(500);
-            return "{\"message\":\"Error: " + safe(e.getMessage()) + "\"}";
+            ctx.status(500);
+            ctx.result("{\"message\":\"Error: " + safe(e.getMessage()) + "\"}");
         }
     }
 
-    private String mapped(Response res, String m) {
+    private void mapped(Context ctx, String m) {
         switch (m) {
-            case "bad request" -> res.status(400);
-            case "unauthorized" -> res.status(401);
-            case "already taken" -> res.status(403);
-            default -> res.status(500);
+            case "bad request" -> ctx.status(400);
+            case "unauthorized" -> ctx.status(401);
+            case "already taken" -> ctx.status(403);
+            default -> ctx.status(500);
         }
-        return "{\"message\":\"Error: " + m + "\"}";
+        ctx.result("{\"message\":\"Error: " + m + "\"}");
     }
 
     private String safe(String s) {
