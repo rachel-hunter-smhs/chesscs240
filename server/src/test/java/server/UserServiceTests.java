@@ -24,4 +24,9 @@ public class UserServiceTests {
         Assertions.assertNotNull(result.authToken());
         Assertions.assertTrue(result.authToken().length() > 5);
     }
+
+    @Test
+    void registerNullRegistrationRequest(){
+        Assertions.assertThrows(DataAccessException.class,()->userService.register(null));
+    }
 }
