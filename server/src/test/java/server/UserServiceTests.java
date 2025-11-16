@@ -7,4 +7,12 @@ import dataaccess.MemoryDataAccess;
 import service.UserService;
 
 public class UserServiceTests {
+    DataAccess dao;
+    UserService userService;
+
+    @BeforeEach
+    void setUp(){
+        dao = new MemoryDataAccess();
+        userService = new UserService(dao);
+    }
 }
