@@ -1,6 +1,6 @@
+/*
 package dataaccess;
 
-import dataaccess.DataAccessException;
 import model.UserData;
 
 import java.util.List;
@@ -11,4 +11,5 @@ public interface UserDAO {
     List<UserData> listUsers() throws DataAccessException;
     void deleteUser(String username) throws DataAccessException;
 }
+ */
 
