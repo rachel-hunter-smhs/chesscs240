@@ -16,7 +16,7 @@ public class UserService {
     public record RegisterResult(String username,String authToken){}
     public RegisterResult register(RegisterRequest r) throws DataAccessException {
         if(r==null||r.username()==null||r.password()==null||r.email()==null) throw new DataAccessException("bad request");
-        dao.createUser(new UserData(r.username(),r.password(),r.email()));
+        dao.createUser(new UserData(r.username(),BCrypt.hashpw(r.password(),BCrypt.gensalt(12)),r.email()));
         String t = UUID.randomUUID().toString();
         dao.createAuth(new AuthData(t,r.username()));
         return new RegisterResult(r.username(),t);

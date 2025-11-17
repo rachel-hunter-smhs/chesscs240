@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,11 +38,10 @@ public class MySQLDataAccess implements DataAccess{
                     }
                 }
             }
-            String hashed = BCrypt.hashpw(u.password(), BCrypt.gensalt());
 
             try(PreparedStatement stmt = conn.prepareStatement(insertSql)){
                 stmt.setString(1, u.username());
-                stmt.setString(2, hashed);
+                stmt.setString(2, u.password());
                 stmt.setString(3, u.email());
                 stmt.executeUpdate();
             }

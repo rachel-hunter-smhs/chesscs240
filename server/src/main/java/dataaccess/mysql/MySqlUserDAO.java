@@ -4,8 +4,6 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import dataaccess.UserDAO;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -82,23 +80,6 @@ public class MySqlUserDAO implements UserDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error deleting user", e);
-        }
-    }
-    public String hashPassword(String secretPassword){
-        if(secretPassword==null||secretPassword.isEmpty()){
-            throw new IllegalArgumentException("Password cannot be blank");
-        }
-        return BCrypt.hashpw(secretPassword,BCrypt.gensalt(12));
-    }
-
-    public boolean checkPassword(String secretPassword, String hashedPassword){
-        if(secretPassword==null||secretPassword.isEmpty()||hashedPassword==null||hashedPassword.isEmpty()){
-            return false;
-        }
-        try{
-            return BCrypt.checkpw(secretPassword,hashedPassword);
-        }catch(IllegalArgumentException e){
-            return false;
         }
     }
 }

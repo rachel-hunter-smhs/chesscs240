@@ -9,13 +9,13 @@ import service.UserService;
 public class UserServiceTests {
     DataAccess dao;
     UserService userService;
-
+    //Creates set up for testing
     @BeforeEach
     void setUp(){
         dao = new MemoryDataAccess();
         userService = new UserService(dao);
     }
-
+    //Checks ability to register a User
     @Test
     void registerPositive() throws DataAccessException{
         var request = new UserService.RegisterRequest("raquelle", "password", "raquelle@hotmail.com");
@@ -24,11 +24,12 @@ public class UserServiceTests {
         Assertions.assertNotNull(result.authToken());
         Assertions.assertTrue(result.authToken().length() > 5);
     }
-
+    //Checks registering a null
     @Test
     void registerNullRegistrationRequest(){
         Assertions.assertThrows(DataAccessException.class,()->userService.register(null));
     }
+    //Checks that it can handle two registerees with the same username through errors
     @Test
     void registerSameUsername() throws DataAccessException{
         var firstUser = new UserService.RegisterRequest("Spongebob", "BikiniBottom", "squarepants@krustykrab.com");
@@ -36,7 +37,7 @@ public class UserServiceTests {
         var secondUser = new UserService.RegisterRequest("Spongebob", "GaryDaSn@il", "spongebobsquarepants@krustykrab.com");
         Assertions.assertThrows(DataAccessException.class, () -> userService.register(secondUser));
     }
-
+    //Tries to users with same email
     @Test
     void registerSameEmail() throws DataAccessException {
         var firstUser = new UserService.RegisterRequest("Spongebob", "BikiniBottom", "squarepants@krustykrab.com");
@@ -50,5 +51,15 @@ public class UserServiceTests {
         Assertions.assertNotNull(resultTwo.authToken());
         Assertions.assertTrue(resultTwo.authToken().length() > 5);
 
+    }
+    //Checks if login is possible with correct information
+    @Test
+    void loginPositive() throws DataAccessException {
+        var firstUser = new UserService.RegisterRequest("Sherlock", "A5tudyInSc@rlet", "sherlockHolmes@gmail.com");
+        userService.register(firstUser);
+        var loginAttempt = new UserService.LoginRequest("Sherlock", "A5tudyInSc@rlet");
+        var result = userService.login(loginAttempt);
+        Assertions.assertEquals("Sherlock", result.username());
+        Assertions.assertNotNull(result.authToken());
     }
 }
