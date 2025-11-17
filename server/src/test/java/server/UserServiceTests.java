@@ -62,4 +62,19 @@ public class UserServiceTests {
         Assertions.assertEquals("Sherlock", result.username());
         Assertions.assertNotNull(result.authToken());
     }
+    //Test for login that has incorrect password
+    @Test
+    void loginWrongPassword() throws DataAccessException {
+        var firstUser = new UserService.RegisterRequest("Sherlock", "A5tudyInSc@rlet", "sherlockHolmes@gmail.com");
+        userService.register(firstUser);
+        var loginAttempt = new UserService.LoginRequest("Sherlock", "NotRightPassword");
+        Assertions.assertThrows(DataAccessException.class, () -> userService.login(loginAttempt));
+    }
+    //Login test for user not in database
+    @Test
+    void loginNonexistingUser(){
+        var loginAttempt = new UserService.LoginRequest("Sherlock", "NotRightPassword");
+        Assertions.assertThrows(DataAccessException.class, () -> userService.login(loginAttempt));
+    }
+
 }
