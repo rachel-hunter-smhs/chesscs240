@@ -16,7 +16,7 @@ public class ServerFacade {
         this.serverLink = "http://localhost:" + port;
         this.httpClient = HttpClient.newHttpClient();
     }
-    public sendRequest register(String username, String password, String email){
+    public AuthData register(String username, String password, String email) throws Exception{
         var request= new RegistrationRequest(username,password,email);
         return sendRequest("POST", "/user", request, AuthData.class, null);
     }
@@ -78,7 +78,7 @@ public class ServerFacade {
 
         return gson.fromJson(body, responseClass);
     }
-    public record AuthData(String username, String authToken) {}
+    //public record AuthData(String username, String authToken) {}
 
     public record RegistrationRequest(String username, String password, String email) {}
 
