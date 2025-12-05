@@ -78,7 +78,10 @@ public class ServerFacade {
 
         return gson.fromJson(body, responseClass);
     }
-    //public record AuthData(String username, String authToken) {}
+    public AuthData login(String username, String password) throws Exception{
+        var request = new LoginRequest(username, password);
+        return (AuthData) sendRequest("POST", "/session",request, AuthData.class,null);
+    }
 
     public record RegistrationRequest(String username, String password, String email) {}
 
@@ -95,4 +98,5 @@ public class ServerFacade {
     public static class ErrorResponse {
         public String message;
     }
+
 }
