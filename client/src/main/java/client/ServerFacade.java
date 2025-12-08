@@ -85,11 +85,20 @@ public class ServerFacade {
     public void logout(String authToken) throws Exception {
         sendRequest("DELETE", "/session", null, null, authToken);
     }
+
     public record RegistrationRequest(String username, String password, String email) {}
 
     public record LoginRequest(String username, String password) {}
 
+    public int createGame(String authToken, String gameName) throws Exception {
+        var req = new CreateGameRequest(gameName);
+        var response = sendRequest("POST", "/game", req, CreateGameResponse.class, authToken);
+        return response.gameID;
+    }
+
     public record CreateGameRequest(String gameName) {}
+
+    public record CreateGameResponse(int gameID){}
 
     public record JoinGameRequest(String playerColor, int gameID) {}
 
