@@ -80,9 +80,11 @@ public class ServerFacade {
     }
     public AuthData login(String username, String password) throws Exception{
         var request = new LoginRequest(username, password);
-        return (AuthData) sendRequest("POST", "/session",request, AuthData.class,null);
+        return sendRequest("POST", "/session",request, AuthData.class,null);
     }
-
+    public void logout(String authToken) throws Exception {
+        sendRequest("DELETE", "/session", null, null, authToken);
+    }
     public record RegistrationRequest(String username, String password, String email) {}
 
     public record LoginRequest(String username, String password) {}
