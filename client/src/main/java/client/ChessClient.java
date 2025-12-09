@@ -50,5 +50,62 @@ public class ChessClient {
             return evalPostlogin(cmd, tokens);
         }
     }
+    private boolean evalPrelogin(String cmd, String[] tokens) throws  Exception{
+        return switch (cmd){
+            case "help" ->{
+                printPreLoginHelp();
+                yield false;
+            }
+            case "quit" -> true;
+            case "register" -> {
+                register(tokens);
+                yield false;
+            }
+            case "login" -> {
+                login(tokens);
+                yield false;
+            }
+            default -> {
+                System.out.println("Unknown command. Type 'help' for available commands");
+                yield false;
+            }
+
+
+        };
+    }
+    private boolean evalPostlogin(String cmd, String[] tokens) throws  Exception{
+        return switch (cmd){
+            case "help" ->{
+                printPostLoginHelp();
+                yield false;
+            }
+            case "logout" -> {
+                logout();
+                yield false;
+            }
+            case "create" -> {
+                createGame(tokens);
+                yield false;
+            }
+            case "list" -> {
+                listGames();
+                yield false;
+            }
+            case "play" ->{
+                playGame(tokens);
+                yield false;
+            }
+
+            default -> {
+                System.out.println("Unknown command. Type 'help' for available commands");
+                yield false;
+            }
+
+
+        };
+    }
+    private void printPreLoginHelp(){
+        sy
+    }
 
 }
