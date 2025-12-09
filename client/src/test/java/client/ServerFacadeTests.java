@@ -57,5 +57,30 @@ public class ServerFacadeTests {
                 || ex.getMessage().toLowerCase().contains("taken")
                 || ex.getMessage().toLowerCase().contains("exists"));
     }
+    @Test
+    void loginNegativeBadPassword() throws Exception {
+        facade.register("user1", "pass", "email@example.com");
+        Exception ex = Assertions.assertThrows(Exception.class, () ->
+                facade.login("user1", "wrong")
+        );
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
+                || ex.getMessage().toLowerCase().contains("error")
+                || ex.getMessage().toLowerCase().contains("incorrect"));
+    }
+
+    @Test
+    void logoutPositive() throws Exception {
+        var auth = facade.register("user1", "pass", "email@example.com");
+        Assertions.assertDoesNotThrow(() -> facade.logout(auth.authToken()));
+    }
+
+    @Test
+    void logoutNegativeBadToken() {
+        Exception ex = Assertions.assertThrows(Exception.class, () ->
+                facade.logout("badToken")
+        );
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
+                || ex.getMessage().toLowerCase().contains("error"));
+    }
 
 }
