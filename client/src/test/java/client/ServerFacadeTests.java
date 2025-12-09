@@ -22,6 +22,14 @@ public class ServerFacadeTests {
         server.stop();
     }
 
+   @BeforeEach
+    void clearDB() {
+        try {
+            facade.clear();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Test
     public void registerPositive() throws Exception{

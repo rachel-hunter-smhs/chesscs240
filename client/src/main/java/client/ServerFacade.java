@@ -85,14 +85,16 @@ public class ServerFacade {
     public void logout(String authToken) throws Exception {
         sendRequest("DELETE", "/session", null, null, authToken);
     }
+    public GameListResult listGames(String authToken) throws Exception {
+        var result = sendRequest("GET", "/game", null, GameListResult.class, authToken);
+        assert result != null;
+        return new GameListResult(result.games() != null ? result.games() : new GameData[0]);
+    }
 
     public record RegistrationRequest(String username, String password, String email) {}
 
     public record LoginRequest(String username, String password) {}
 
-    public GameListResult listGames(String authToken) throws Exception {
-        return sendRequest("GET", "/game", null, GameListResult.class, authToken);
-    }
     public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
         var req = new JoinGameRequest(playerColor, gameID);
         sendRequest("PUT", "/game", req, null, authToken);
@@ -105,9 +107,7 @@ public class ServerFacade {
     public record JoinGameRequest(String playerColor, int gameID) {}
 
     public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName) {}
-
     public record GameListResult(GameData[] games) {}
-
     public static class ErrorResponse {
         public String message;
     }
