@@ -98,6 +98,10 @@ public class ServerFacade {
     public GameListResult listGames(String authToken) throws Exception {
         return sendRequest("GET", "/game", null, GameListResult.class, authToken);
     }
+    public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
+        var req = new JoinGameRequest(playerColor, gameID);
+        sendRequest("PUT", "/game", req, null, authToken);
+    }
 
     public record CreateGameRequest(String gameName) {}
 
