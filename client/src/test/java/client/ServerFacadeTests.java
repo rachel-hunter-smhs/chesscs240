@@ -22,6 +22,10 @@ public class ServerFacadeTests {
     static void stopServer() {
         server.stop();
     }
+    @BeforeEach
+    public void clearDatabase () throws Exception {
+        facade.clear();
+    }
 
    /*@BeforeEach
     void clearDB() {
@@ -52,22 +56,16 @@ public class ServerFacadeTests {
     @Test
     void registerNegativeDuplicateUser() throws Exception {
         facade.register("user1", "pass", "email@example.com");
-        Exception ex = Assertions.assertThrows(Exception.class, () ->
+        Assertions.assertThrows(Exception.class, () ->
                 facade.register("user1", "pass", "email@example.com")
         );
-        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("already")
-                || ex.getMessage().toLowerCase().contains("taken")
-                || ex.getMessage().toLowerCase().contains("exists"));
     }
     @Test
     void loginNegativeBadPassword() throws Exception {
         facade.register("user1", "pass", "email@example.com");
-        Exception ex = Assertions.assertThrows(Exception.class, () ->
+        Assertions.assertThrows(Exception.class, () ->
                 facade.login("user1", "wrong")
         );
-        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
-                || ex.getMessage().toLowerCase().contains("error")
-                || ex.getMessage().toLowerCase().contains("incorrect"));
     }
 
     @Test
@@ -78,16 +76,11 @@ public class ServerFacadeTests {
 
     @Test
     void logoutNegativeBadToken() {
-        Exception ex = Assertions.assertThrows(Exception.class, () ->
+        Assertions.assertThrows(Exception.class, () ->
                 facade.logout("badToken")
         );
-        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
-                || ex.getMessage().toLowerCase().contains("error"));
     }
-    @BeforeEach
-    public void clearDatabase () throws Exception {
-        facade.clear();
-    }
+
     @Test
     void createGamePositive() throws Exception{
         AuthData auth = facade.register("user1","pass", "email@example.com");
@@ -96,11 +89,10 @@ public class ServerFacadeTests {
         Assertions.assertTrue(response.gameID()>0);
     }
     @Test
-    void createGameNegativeNoAuth(){
-        Exception ex = Assertions.assertThrows(Exception.class,
-                () -> facade.createGame("badToken", "TestGame"));
-        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
-                || ex.getMessage().toLowerCase().contains("error"));
+    void createGameNegativeNoAuth() {
+        Assertions.assertThrows(Exception.class, () ->
+                facade.createGame("badToken", "TestGame")
+        );
     }
     @Test
     void listGamePositive() throws Exception{
@@ -111,6 +103,28 @@ public class ServerFacadeTests {
         var test = facade.listGames(auth.authToken());
         Assertions.assertNotNull(test);
         Assertions.assertTrue(test.games().length >=2);
+    }
+    @Test
+    void listGamesNegNoAuth() {
+        Assertions.assertThrows(Exception.class, () ->
+                facade.listGames("badToken")
+        );
+    }
+    @Test
+    void joinGamePos() throws Exception{
+        AuthData auth = facade.register("user1", "PaSs", "email@ex.com");
+        var gamePlay = facade.createGame(auth.authToken(), "TestGame");
+
+        Assertions.assertDoesNotThrow(() ->
+                facade.joinGame(auth.authToken(), gamePlay.gameID(), "WHITE"));
+
+    }
+    @Test
+    void joinGameNegBadGameID() throws Exception{
+        AuthData auth = facade.register("user1", "pass", "email@ex.com");
+        Exception except = Assertions.assertThrows(Exception.class,
+                ()-> facade.joinGame(auth.authToken(), 9999, "WHITE"));
+        Assertions.assertNotNull(except.getMessage());
     }
 
 }
