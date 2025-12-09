@@ -65,10 +65,6 @@
             <version>1.0.0</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.sparkjava</groupId>
-                    <artifactId>spark-core</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>edu.byu.cs240</groupId>
                     <artifactId>passoff-dependencies</artifactId>
                 </exclusion>
