@@ -22,7 +22,7 @@ public class ServerFacadeTests {
         server.stop();
     }
 
-   @BeforeEach
+   /*@BeforeEach
     void clearDB() {
         try {
             facade.clear();
@@ -30,6 +30,7 @@ public class ServerFacadeTests {
             throw new RuntimeException(e);
         }
     }
+    */
 
     @Test
     public void registerPositive() throws Exception{
