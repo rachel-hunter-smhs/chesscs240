@@ -90,6 +90,12 @@ public class ServerFacade {
         assert result != null;
         return new GameListResult(result.games() != null ? result.games() : new GameData[0]);
     }
+    public CreateGameResponse createGame (String AuthToken, String gameName) throws Exception{
+        var request = new CreateGameRequest(gameName);
+        return sendRequest("POST", "/game", request, CreateGameResponse.class, AuthToken);
+
+
+    }
 
     public record RegistrationRequest(String username, String password, String email) {}
 

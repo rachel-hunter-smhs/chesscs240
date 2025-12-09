@@ -1,5 +1,6 @@
 package client;
 
+import model.AuthData;
 import org.junit.jupiter.api.*;
 import server.Server;
 
@@ -80,6 +81,24 @@ public class ServerFacadeTests {
         Exception ex = Assertions.assertThrows(Exception.class, () ->
                 facade.logout("badToken")
         );
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
+                || ex.getMessage().toLowerCase().contains("error"));
+    }
+    @BeforeEach
+    public void clearDatabase () throws Exception {
+        facade.clear();
+    }
+    @Test
+    void createGamePositive() throws Exception{
+        AuthData auth = facade.register("user1","pass", "email@example.com");
+        var response = facade.createGame(auth.authToken(), "TestGame");
+        Assertions.assertNotNull(response);
+        Assertions.assertTrue(response.gameID()>0);
+    }
+    @Test
+    void createGameNegativeNoAuth(){
+        Exception ex = Assertions.assertThrows(Exception.class,
+                () -> facade.createGame("badToken", "TestGame"));
         Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
                 || ex.getMessage().toLowerCase().contains("error"));
     }
