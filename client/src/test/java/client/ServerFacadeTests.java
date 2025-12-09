@@ -35,6 +35,8 @@ public class ServerFacadeTests {
     public void registerPositive() throws Exception{
         var authData = facade.register("player1", "password", "p1@email.com");
         Assertions.assertNotNull(authData);
+        Assertions.assertNotNull(authData.authToken());
+        Assertions.assertEquals("player1",authData.username());
         Assertions.assertTrue(authData.authToken().length()>10);
     }
     @Test
@@ -44,6 +46,16 @@ public class ServerFacadeTests {
         Assertions.assertNotNull(authData);
         Assertions.assertNotNull(authData.authToken());
 
+    }
+    @Test
+    void registerNegativeDuplicateUser() throws Exception {
+        facade.register("user1", "pass", "email@example.com");
+        Exception ex = Assertions.assertThrows(Exception.class, () ->
+                facade.register("user1", "pass", "email@example.com")
+        );
+        Assertions.assertTrue(ex.getMessage().toLowerCase().contains("already")
+                || ex.getMessage().toLowerCase().contains("taken")
+                || ex.getMessage().toLowerCase().contains("exists"));
     }
 
 }
