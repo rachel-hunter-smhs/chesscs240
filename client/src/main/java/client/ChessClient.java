@@ -105,7 +105,20 @@ public class ChessClient {
         };
     }
     private void printPreLoginHelp(){
-        sy
+        System.out.println("Possible commands");
+        System.out.println(" register <username> <password> <email> : Creates new account");
+        System.out.println(" login <username> <password> : logins into to your account");
+        System.out.println(" quit : exits program");
+        System.out.println(" help: shows help message");
+    }
+    private void printPostLoginHelp(){
+        System.out.println("Possible commands");
+        System.out.println(" create <game name> : Creates new game");
+        System.out.println(" list : lists all games");
+        System.out.println(" play <game number> <WHITE|BLACK> : Joins game");
+        System.out.println(" observe <game number>: Observes game");
+        System.out.println(" logout : logs out");
+        System.out.println(" help: prints this message");
     }
 
 }
