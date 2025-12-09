@@ -102,5 +102,15 @@ public class ServerFacadeTests {
         Assertions.assertTrue(ex.getMessage().toLowerCase().contains("unauthorized")
                 || ex.getMessage().toLowerCase().contains("error"));
     }
+    @Test
+    void listGamePositive() throws Exception{
+        AuthData auth = facade.register("user1", "pass", "email@ex.com");
+        facade.createGame(auth.authToken(), "Game1");
+        facade.createGame(auth.authToken(), "Game2");
+
+        var test = facade.listGames(auth.authToken());
+        Assertions.assertNotNull(test);
+        Assertions.assertTrue(test.games().length >=2);
+    }
 
 }
