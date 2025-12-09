@@ -95,6 +95,9 @@ public class ServerFacade {
         var response = sendRequest("POST", "/game", req, CreateGameResponse.class, authToken);
         return response.gameID;
     }
+    public GameListResult listGames(String authToken) throws Exception {
+        return sendRequest("GET", "/game", null, GameListResult.class, authToken);
+    }
 
     public record CreateGameRequest(String gameName) {}
 
