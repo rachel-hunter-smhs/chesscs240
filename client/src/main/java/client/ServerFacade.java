@@ -90,12 +90,6 @@ public class ServerFacade {
 
     public record LoginRequest(String username, String password) {}
 
-    public int createGame(String authToken, String gameName) throws Exception {
-        var req = new CreateGameRequest(gameName);
-        var response = sendRequest("POST", "/game", req, CreateGameResponse.class, authToken);
-        assert response != null;
-        return response.gameID;
-    }
     public GameListResult listGames(String authToken) throws Exception {
         return sendRequest("GET", "/game", null, GameListResult.class, authToken);
     }
@@ -117,5 +111,9 @@ public class ServerFacade {
     public static class ErrorResponse {
         public String message;
     }
+    public void clear() throws Exception {
+        sendRequest("DELETE", "/db", null, null, null);
+    }
+
 
 }
