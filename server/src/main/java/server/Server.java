@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dataaccess.DataAccessException;
@@ -12,6 +13,7 @@ import service.GameService;
 import service.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import websocket.commands.CommandMakeMove;
 import websocket.message.*;
 import websocket.commands.GameCommandUser;
 import server.websocket.Connections;
@@ -166,11 +168,83 @@ public class Server {
         connect.broadcast(gameID, notify, ctx.session);
 
     }
-    private void doMakeMove(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
-        sendError(ctx.session, "MAKE_MOVE not implemented");
+    private void doMakeMove(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
+        String username = getUsername(command.getAuthToken());
+
+        int gameID =command.getGameID();
+        GameData gameData = dao.getGame(gameID);
+        ChessGame game = gameData.game();
+        if(game == null){
+            sendError(ctx.session, "No Game :(");
+            return;
+        }
+        //ChessGame game = gameData.game();
+       if(!(command instanceof CommandMakeMove)){
+           sendError(ctx.session, "Invalid command");
+           return;
+       }
+       CommandMakeMove moveGo = (CommandMakeMove) command;
+       chess.ChessMove move = moveGo.getChessMove();
+        ChessGame.TeamColor playerColor = null;
+        if(username.equals(gameData.whiteUsername())){
+            playerColor = ChessGame.TeamColor.WHITE;
+        } else if (username.equals(gameData.blackUsername())) {
+            playerColor = ChessGame.TeamColor.BLACK;
+        } else{
+            sendError(ctx.session, "you are not a player :-P");
+            return;
+        }
+        if ((game.getTeamTurn() != playerColor)){
+            sendError(ctx.session, "Not your turn B-)");
+            return;
+        }
+        try {
+            game.makeMove(move);
+            dao.saveGame(gameData);
+            String loadGameJson = gson.toJson(new Loadgamemessages(game));
+            connect.broadcast(gameID, loadGameJson, null);
+            ChessGame.TeamColor opp = (playerColor == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            if (game.isInCheckmate(opp)){
+                String winner = gson.toJson((new NotificationMessage(username +"wins by checkmate! YAY")));
+                connect.broadcast(gameID, winner, null);
+            } else if (game.isInStalemate(opp)) {
+                String tie = gson.toJson((new NotificationMessage("Stalemate :( no winners")));
+                connect.broadcast(gameID, tie, null);
+
+            } else if (game.isInCheck(opp)) {
+                String checkUrself = gson.toJson((new NotificationMessage(opp +"is in check")));
+                connect.broadcast(gameID, checkUrself, null);
+
+
+            }
+        } catch (chess.InvalidMoveException e) {
+            sendError(ctx.session, "Invalid move");
+        }
+
     }
-    private void doLeave(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
-        sendError(ctx.session, "LEAVE not implemented");
+    private void doLeave(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
+        String username = getUsername(command.getAuthToken());
+        int gameID =command.getGameID();
+        GameData gameData = dao.getGame(gameID);
+        ChessGame game = gameData.game();
+        if(game == null){
+            sendError(ctx.session, "No Game :(");
+            return;
+        }
+        String White  = gameData.whiteUsername();
+        String Black = gameData.blackUsername();
+        if (username.equals(White)){
+            White = null;
+        } else if (username.equals(Black)) {
+            Black = null;
+
+        }
+        GameData update = new GameData(gameData.gameID(), White, Black, gameData.gameName(), gameData.game());
+        dao.saveGame(update);
+        connect.remove(gameID, ctx.session);
+
+        String tellDaWorld = gson.toJson(new NotificationMessage(username + "left"));
+        connect.broadcast(gameID, tellDaWorld, null);
     }
     private void doResign (io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
         sendError(ctx.session, "RESIGN not implemented");
