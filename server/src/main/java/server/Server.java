@@ -1,21 +1,30 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dataaccess.DataAccessException;
 import dataaccess.MySQLDataAccess;
+import model.GameData;
+import server.websocket.Connections;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import websocket.message.*;
 import websocket.commands.GameCommandUser;
+import server.websocket.Connections;
+import org.eclipse.jetty.websocket.api.Session;
+
+
 
 
 
 public class Server {
     private final Gson gson = new Gson();
     private final Javalin javalin;
+    private  final Connections connect = new Connections();
     private record NameOnly(String gameName) {}
     private record JoinBody(String playerColor, int gameID) {}
 
@@ -64,12 +73,17 @@ public class Server {
 
             ws.onMessage(ctx -> {
                 System.out.println("Received message: " + ctx.message());
+
                 try {
                     GameCommandUser command = gson.fromJson(ctx.message(), GameCommandUser.class);
-                    if(command.getCommandType() == GameCommandUser.CommandType.CONNECT){
-                        System.out.println("Conneccting Client to game" + command.getGameID());
-                        ctx.send("Successful connection" + command.getGameID());
-                    }
+                   switch (command.getCommandType()){
+                       case CONNECT ->  doConnect(ctx, command, connect);
+                       case MAKE_MOVE ->  doMakeMove(ctx, command, connect);
+                       case LEAVE->  doLeave(ctx, command, connect);
+                       case RESIGN ->  doResign(ctx, command, connect);
+
+
+                   }
                 } catch (Exception e){
                     ctx.send("Error " + e.getMessage());
                 }
@@ -132,4 +146,39 @@ public class Server {
     private String safe(String s) {
         return s == null ? "" : s.replace("\"", "'");
     }
+    private void doConnect(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
+        String username = "user";
+
+        var dao = new MySQLDataAccess();
+        int gameID =command.getGameID();
+        GameData gameData = dao.getGame(gameID);
+        ChessGame game = gameData.game();
+
+        connect.add(gameID, ctx.session);
+        String loadGameJson = gson.toJson(new websocket.message.Loadgamemessages(game));
+        ctx.send(loadGameJson);
+        String notify = gson.toJson(new websocket.message.NotificationMessage( username +" joined"));
+        connect.broadcast(gameID, notify, ctx.session);
+
+    }
+    private void doMakeMove(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
+        sendError(ctx.session, "MAKE_MOVE not implemented");
+    }
+    private void doLeave(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
+        sendError(ctx.session, "LEAVE not implemented");
+    }
+    private void doResign (io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
+        sendError(ctx.session, "RESIGN not implemented");
+    }
+    private void sendError(Session sesh, String oops){
+        try{
+            String oopsJson = gson.toJson(new websocket.message.ErrorMessage(oops));
+            sesh.getRemote().sendString(oopsJson);
+        } catch(Exception e){
+            System.err.println("Failed to send error" + e.getMessage());
+        }
+    }
+
+
+
 }
