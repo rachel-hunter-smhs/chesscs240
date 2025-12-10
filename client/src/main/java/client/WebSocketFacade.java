@@ -2,7 +2,7 @@ package client;
 
 import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessag;
+import websocket.messages.ServerMessage;
 
 public class WebSocketFacade {
 }
