@@ -9,6 +9,8 @@ import service.GameService;
 import service.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import websocket.commands.GameCommandUser;
+
 
 
 public class Server {
@@ -62,7 +64,15 @@ public class Server {
 
             ws.onMessage(ctx -> {
                 System.out.println("Received message: " + ctx.message());
-                ctx.send("Echo: " + ctx.message());
+                try {
+                    GameCommandUser command = gson.fromJson(ctx.message(), GameCommandUser.class);
+                    if(command.getCommandType() == GameCommandUser.CommandType.CONNECT){
+                        System.out.println("Conneccting Client to game" + command.getGameID());
+                        ctx.send("Successful connection" + command.getGameID());
+                    }
+                } catch (Exception e){
+                    ctx.send("Error " + e.getMessage());
+                }
             });
 
             ws.onClose(ctx -> {

@@ -226,7 +226,7 @@ public class ChessClient {
         try{
             if(ws == null){
                 ws =   new WebSocketFacade("ws://localhost:8080/ws");
-                ws.send("hi from client");
+                ws.connect(authToken, 1);
             }else {
                 System.out.println("already connected");
             }

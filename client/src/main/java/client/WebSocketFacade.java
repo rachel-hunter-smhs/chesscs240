@@ -28,6 +28,9 @@ public class WebSocketFacade {
     }
     public void connect(String authToken, int gameid) throws Exception{
         GameCommandUser command = new GameCommandUser( GameCommandUser.CommandType.CONNECT,  authToken, gameid);
+        String json = gson.toJson(command);
+        System.out.println("Sending connect: " + json);
+        send(json);
     }
 
     public void send(String message) throws Exception {
