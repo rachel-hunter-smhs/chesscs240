@@ -192,6 +192,10 @@ public class Server {
             sendError(ctx.session, "No Game :(");
             return;
         }
+        if (resignedGames.contains(gameID)) {
+            sendError(ctx.session, "Game is over");
+            return;
+        }
 
        if(!(command instanceof CommandMakeMove)){
            sendError(ctx.session, "Invalid command");
@@ -221,6 +225,8 @@ public class Server {
             dao.saveGame(gameData);
             String loadGameJson = gson.toJson(new LoadGameMessage(game));
             connect.broadcast(gameID, loadGameJson, null);
+            String moveNotification = gson.toJson(new NotificationMessage(username + " made a move"));
+            connect.broadcast(gameID, moveNotification, ctx.session);
             ChessGame.TeamColor opp = (playerColor == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             if (game.isInCheckmate(opp)){
                 String winner = gson.toJson((new NotificationMessage(username +"wins by checkmate! YAY")));
