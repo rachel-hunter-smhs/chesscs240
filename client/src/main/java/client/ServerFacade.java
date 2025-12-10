@@ -103,6 +103,7 @@ public class ServerFacade {
 
     public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
         var req = new JoinGameRequest(playerColor, gameID);
+        System.out.println("Joining game with" + gson.toJson(req));
         sendRequest("PUT", "/game", req, null, authToken);
     }
 
