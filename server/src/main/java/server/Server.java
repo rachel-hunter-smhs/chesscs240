@@ -85,6 +85,7 @@ public class Server {
 
                    }
                 } catch (Exception e){
+                    String oopSJSon = gson.toJson(new websocket.message.ErrorMessage(e.getMessage()));
                     ctx.send("Error " + e.getMessage());
                 }
             });
