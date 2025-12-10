@@ -30,6 +30,7 @@ public class Server {
     private final Set<Integer> resignedGames = ConcurrentHashMap.newKeySet();
 
 
+
     public Server(){
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
         var dao   = new MySQLDataAccess();
