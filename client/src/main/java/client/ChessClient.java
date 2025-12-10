@@ -1,4 +1,6 @@
 package client;
+import chess.ChessGame;
+
 import java.util.Scanner;
 
 public class ChessClient {
@@ -7,10 +9,16 @@ public class ChessClient {
     private ServerFacade.GameData[] gameList = null;
     private State state = State.PRELOGIN;
     private WebSocketFacade ws = null;
+    private chess.ChessGame currentGame = null;
 
     private enum State{
         PRELOGIN,
         POSTLOGIN
+    }
+    interface ServerMessageFixer{
+        void onLoadGame(ChessGame game);
+        void onNotification(String message);
+        void onError(String errorMessage);
     }
 
     public ChessClient(ServerFacade server){
@@ -222,14 +230,14 @@ public class ChessClient {
         server.joinGame(authToken, gameID, color);
         System.out.println("Joined game " + color);
         if (ws == null){
-            ws = new WebSocketFacade("ws://localhost:8080/ws");
+            ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
         }
         ws.connect(authToken, gameID);
     }
     private void  testWebSocket(){
         try{
             if(ws == null){
-                ws =   new WebSocketFacade("ws://localhost:8080/ws");
+                ws =   new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
                 ws.connect(authToken, 1);
             }else {
                 System.out.println("already connected");
