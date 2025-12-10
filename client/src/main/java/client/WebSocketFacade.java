@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
-import websocket.messages.Loadgamemessages;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.net.URI;
@@ -33,12 +33,12 @@ public class WebSocketFacade {
        try {
            switch (messageType){
                case "LOAD_GAME" -> {
-                   Loadgamemessages load = gson.fromJson(message, Loadgamemessages.class);
+                   LoadGameMessage load = gson.fromJson(message, Loadgamemessages.class);
                    fixer.LOAD_GAME(load.getGame());
                }
                case "NOTIFICATION" -> {
                    NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
-                   fixer.NOTIFICATION(note.getNotification());
+                   fixer.NOTIFICATION(note.getMessage());
                }
                case "ERROR" -> {
                    ErrorMessage err = gson.fromJson(message, ErrorMessage.class);

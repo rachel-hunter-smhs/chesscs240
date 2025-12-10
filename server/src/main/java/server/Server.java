@@ -15,7 +15,6 @@ import io.javalin.http.Context;
 import websocket.commands.CommandMakeMove;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
-import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
 
 
@@ -175,7 +174,7 @@ public class Server {
         }
 
         connect.add(gameID, ctx.session);
-        String loadGameJson = gson.toJson(new websocket.messages.Loadgamemessages(game));
+        String loadGameJson = gson.toJson(new LoadGameMessage(game));
         ctx.send(loadGameJson);
         String notify = gson.toJson(new websocket.messages.NotificationMessage( username +" joined"));
         connect.broadcast(gameID, notify, ctx.session);
@@ -214,7 +213,7 @@ public class Server {
         try {
             game.makeMove(move);
             dao.saveGame(gameData);
-            String loadGameJson = gson.toJson(new Loadgamemessages(game));
+            String loadGameJson = gson.toJson(new LoadGameMessage(game));
             connect.broadcast(gameID, loadGameJson, null);
             ChessGame.TeamColor opp = (playerColor == ChessGame.TeamColor.WHITE) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             if (game.isInCheckmate(opp)){
