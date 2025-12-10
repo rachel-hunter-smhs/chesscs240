@@ -60,5 +60,7 @@ public class BoardDrawer {
                 drawSquare(board, r, c);
             }
         }
+        System.out.print(BORDER_COLOR + " " + r + " " + RESET_BG_COLOR);
+        System.out.println();
     }
 }
