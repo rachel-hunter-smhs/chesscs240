@@ -4,6 +4,7 @@ import java.util.Scanner;
 public class ChessClient {
     private final ServerFacade server;
     private String authToken = null;
+    private ServerFacade.GameData[] gameList = null;
     private State state = State.PRELOGIN;
 
     private enum State{
@@ -178,6 +179,7 @@ public class ChessClient {
 
     private void listGames() throws Exception{
         var result = server.listGames(authToken);
+        gameList = result.games();
         if (result.games().length == 0){
             System.out.println("No available games");
             return;
