@@ -83,10 +83,16 @@ public class BoardDrawer {
         Boolean ColorWhite = p.getTeamColor() == ChessGame.TeamColor.WHITE;
         String sym = switch (p.getPieceType()) {
             case KING -> ColorWhite ? WHITE_KING : BLACK_KING;
-            case QUEEN -> ;
-            case BISHOP -> ;
-            case KNIGHT -> ;
-            case ROOK -> ;
+            case QUEEN -> ColorWhite ? WHITE_QUEEN : BLACK_QUEEN;
+            case BISHOP -> ColorWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> ColorWhite ? WHITE_KNIGHT: BLACK_KNIGHT;
+            case ROOK -> ColorWhite ? WHITE_ROOK : BLACK_ROOK;
+            case PAWN ->ColorWhite ? WHITE_PAWN : BLACK_PAWN;
         };
+        if (ColorWhite){
+            return SET_TEXT_COLOR_RED + sym + RESET_TEXT_COLOR;
+        } else{
+            return SET_TEXT_COLOR_BLUE + sym + RESET_TEXT_COLOR;
+        }
     }
 }
