@@ -16,6 +16,7 @@ public class ChessClient {
     private State state = State.PRELOGIN;
     private WebSocketFacade ws = null;
     private chess.ChessGame currentGame = null;
+    private ChessGame.TeamColor playerColor =null;
 
     private enum State{
         PRELOGIN,
@@ -210,6 +211,7 @@ public class ChessClient {
     }
 
     private void playGame(String[] tokens) throws Exception{
+
         if(tokens.length != 3){
             System.out.println("play rewuires play <game number> <WHITE|BLACK>");
             return;
@@ -229,6 +231,7 @@ public class ChessClient {
             System.out.println("WHITE OR BLACK ONLY");
             return;
         }
+        playerColor = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
         server.joinGame(authToken, gameID, color);
         System.out.println("Joined game " + color);
         if (ws == null){
@@ -266,7 +269,8 @@ public class ChessClient {
         }
         int gameID = gameList[gameNum - 1].gameID();
         server.joinGame(authToken, gameID, null);
-        System.out.println("You are currently observing the game");
+        playerColor = ChessGame.TeamColor.WHITE;
+        System.out.println("Hi Observer, FYI you are currently only observing");
         if (ws == null){
             ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
         }
@@ -278,7 +282,7 @@ public class ChessClient {
             public void onLoadGame(ChessGame game) {
                 currentGame = game;
                 System.out.println("\n=== Board Updated ===");
-                System.out.println("Board Loaded");
+                BoardDrawer.drawBoard(game, playerColor);
             }
 
             @Override

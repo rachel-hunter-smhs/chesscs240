@@ -3,12 +3,13 @@ import chess.ChessGame;
 
 
 import com.google.gson.Gson;
+import jakarta.websocket.*;
 import websocket.commands.GameCommandUser;
 import websocket.message.ErrorMessage;
 import websocket.message.Loadgamemessages;
 import websocket.message.NotificationMessage;
 import websocket.message.ServerMessage;
-import javax.websocket.*;
+
 import java.net.URI;
 @ClientEndpoint
 public class WebSocketFacade {
