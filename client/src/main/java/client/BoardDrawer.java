@@ -1,6 +1,8 @@
 package client;
 import chess.*;
 import ui.EscapeSequences;
+
+import static chess.ChessPiece.PieceType.KING;
 import static  ui.EscapeSequences.*;
 public class BoardDrawer {
     private static final String LIGHT_SQUARE = SET_BG_COLOR_LIGHT_GREY;
@@ -62,5 +64,29 @@ public class BoardDrawer {
         }
         System.out.print(BORDER_COLOR + " " + r + " " + RESET_BG_COLOR);
         System.out.println();
+    }
+    private static void  drawSquare(ChessBoard board, int r, int c){
+        boolean LightSquare = (r + c) % 2 == 0;
+        String color = LightSquare ? LIGHT_SQUARE : DARK_SQUARE;
+
+        ChessPosition pos = new ChessPosition(r, c);
+        ChessPiece piece = board.getPiece(pos);
+        System.out.print(color);
+        if(piece == null){
+            System.out.print(EMPTY);
+        } else{
+            System.out.print(pieceSymbols(piece));
+        }
+        System.out.print(RESET_BG_COLOR);
+    }
+    private static String pieceSymbols(ChessPiece p){
+        Boolean ColorWhite = p.getTeamColor() == ChessGame.TeamColor.WHITE;
+        String sym = switch (p.getPieceType()) {
+            case KING -> ColorWhite ? WHITE_KING : BLACK_KING;
+            case QUEEN -> ;
+            case BISHOP -> ;
+            case KNIGHT -> ;
+            case ROOK -> ;
+        };
     }
 }
