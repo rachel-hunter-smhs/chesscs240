@@ -33,7 +33,7 @@ public class WebSocketFacade {
        try {
            switch (messageType){
                case "LOAD_GAME" -> {
-                   LoadGameMessage load = gson.fromJson(message, Loadgamemessages.class);
+                   LoadGameMessage load = gson.fromJson(message, LoadGameMessage.class);
                    fixer.LOAD_GAME(load.getGame());
                }
                case "NOTIFICATION" -> {
