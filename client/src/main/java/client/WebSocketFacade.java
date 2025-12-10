@@ -2,6 +2,9 @@ package client;
 
 import com.google.gson.Gson;
 import websocket.commands.GameCommandUser;
+import websocket.message.ErrorMessage;
+import websocket.message.Loadgamemessages;
+import websocket.message.NotificationMessage;
 import websocket.message.ServerMessage;
 import javax.websocket.*;
 import java.net.URI;
@@ -22,7 +25,28 @@ public class WebSocketFacade {
     }
     @OnMessage
     public void onMessage(String message, Session session) {
-        System.out.println("Received from server: " + message);
+        com.google.gson.JsonObject jsonObject = gson.fromJson(message, com.google.gson.JsonObject.class);
+        String messageType = jsonObject.get("serverMessageType").getAsString();
+       try {
+           switch (messageType){
+               case "LOAD_GAME" -> {
+                   Loadgamemessages load = gson.fromJson(message, Loadgamemessages.class);
+                   fixer.onLoadGame(load.getGame());
+               }
+               case "NOTIFICATION" -> {
+                   NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
+                   fixer.onNotification(note.getNotification());
+               }
+               case "ERROR" -> {
+                   ErrorMessage err = gson.fromJson(message, ErrorMessage.class);
+                   fixer.onError(err.getErrorMessage());
+               }
+           }
+
+       } catch (Exception e) {
+           System.err.println("Error parsing message: " + e.getMessage());
+
+       }
     }
     @OnError
     public void onError(Session session, Throwable throwable) {
