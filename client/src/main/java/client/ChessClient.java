@@ -6,6 +6,7 @@ public class ChessClient {
     private String authToken = null;
     private ServerFacade.GameData[] gameList = null;
     private State state = State.PRELOGIN;
+    private WebSocketFacade ws = null;
 
     private enum State{
         PRELOGIN,
@@ -104,6 +105,10 @@ public class ChessClient {
             case "observe" ->{
                 observeGame(tokens);
                 yield false;
+            }
+            case  "test" -> {
+                testWebSocket();
+                yield  false;
             }
             default -> {
                 System.out.println("Unknown command. Type 'help' for available commands");
@@ -216,6 +221,19 @@ public class ChessClient {
         }
         server.joinGame(authToken, gameID, color);
         System.out.println("Joined game " + color);
+    }
+    private void  testWebSocket(){
+        try{
+            if(ws == null){
+                ws =   new WebSocketFacade("ws://localhost:8080/ws");
+                ws.send("hi from client");
+            }else {
+                System.out.println("already connected");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("websocket errpr" + e.getMessage());
+        }
     }
 
     private void observeGame(String[] tokens) throws Exception {

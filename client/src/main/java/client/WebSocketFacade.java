@@ -14,4 +14,27 @@ public class WebSocketFacade {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.sesh = container.connectToServer(this, uri);
     }
+    @OnOpen
+    public void  onOpen(Session session){
+        System.out.println("WebSocket connected to server");
+    }
+    @OnMessage
+    public void onMessage(String message, Session session) {
+        System.out.println("Received from server: " + message);
+    }
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        System.err.println("WebSocket error: " + throwable.getMessage());
+    }
+    public void connect(String authToken, int gameid) throws Exception{
+        GameCommandUser command = new GameCommandUser( GameCommandUser.CommandType.CONNECT,  authToken, gameid);
+    }
+
+    public void send(String message) throws Exception {
+        sesh.getBasicRemote().sendText(message);
+    }
+
+    public void close() throws Exception {
+        sesh.close();
+    }
 }
