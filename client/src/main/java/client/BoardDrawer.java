@@ -19,6 +19,19 @@ public class BoardDrawer {
     private static void drawWhiteView(ChessBoard board){
         System.out.println();
         drawBorderRow(true);
-        for(int r = 8; r >=1; r--){}
+        for(int r = 8; r >=1; r--){
+            drawRow(board, r, true);
+        }
+        drawBorderRow(true);
+        System.out.println();
+    }
+    private static void drawBlackView(ChessBoard board){
+        System.out.println();
+        drawBorderRow(false);
+        for(int r = 1; r <= 8; r++){
+            drawRow(board, r, false);
+        }
+        drawBorderRow(false);
+        System.out.println();
     }
 }
