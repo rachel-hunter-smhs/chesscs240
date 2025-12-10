@@ -103,19 +103,10 @@ public class ServerFacade {
     public record LoginRequest(String username, String password) {}
 
     public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
-        Object req;
-        if(playerColor == null){
-            req = new ObserveGameRequest(gameID);
-            System.out.println("Joining game with" + gson.toJson(req));
-        }
-        else{
-            req = new JoinGameRequest(playerColor, gameID);
-            System.out.println("Joining game with" + gson.toJson(req));
-        }
-
-
+        var req = new JoinGameRequest(playerColor, gameID);
         sendRequest("PUT", "/game", req, null, authToken);
     }
+
 
     public record CreateGameRequest(String gameName) {}
 

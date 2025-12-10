@@ -218,22 +218,23 @@ public class ChessClient {
         System.out.println("Joined game " + color);
     }
 
-    private void observeGame(String[] tokens) throws Exception{
-       if(tokens.length != 2){
-           System.out.println("needed : observe <game num>");
-           return;
-       }
-        if (gameList == null){
+    private void observeGame(String[] tokens) throws Exception {
+        if (tokens.length != 2) {
+            System.out.println("needed : observe <game num>");
+            return;
+        }
+        if (gameList == null) {
             System.out.println("Please run 'list' first to see available games");
             return;
         }
-       int gameNum = Integer.parseInt(tokens[1]);
-       if(gameNum <1 || gameNum > gameList.length){
-           System.out.println("Incorrect Game num");
-           return;
-       }
-       int gameID = gameList[gameNum -1].gameID();
-       server.joinGame(authToken, gameID, null);
-       System.out.println("You are currently observing the game");
+        int gameNum = Integer.parseInt(tokens[1]);
+        if (gameNum < 1 || gameNum > gameList.length) {
+            System.out.println("Incorrect Game num");
+            return;
+        }
+        int gameID = gameList[gameNum - 1].gameID();
+        server.joinGame(authToken, gameID, null);
+        System.out.println("You are currently observing the game");
     }
+
 }
