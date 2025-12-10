@@ -3,6 +3,12 @@ import chess.ChessGame;
 
 import java.util.Scanner;
 
+interface ServerMessageFixer{
+    void onLoadGame(ChessGame game);
+    void onNotification(String message);
+    void onError(String errorMessage);
+}
+
 public class ChessClient {
     private final ServerFacade server;
     private String authToken = null;
@@ -15,11 +21,7 @@ public class ChessClient {
         PRELOGIN,
         POSTLOGIN
     }
-    interface ServerMessageFixer{
-        void onLoadGame(ChessGame game);
-        void onNotification(String message);
-        void onError(String errorMessage);
-    }
+
 
     public ChessClient(ServerFacade server){
         this.server = server;
@@ -266,9 +268,29 @@ public class ChessClient {
         server.joinGame(authToken, gameID, null);
         System.out.println("You are currently observing the game");
         if (ws == null){
-            ws = new WebSocketFacade("ws://localhost:8080/ws");
+            ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
         }
         ws.connect(authToken, gameID);
+    }
+    private ServerMessageFixer createMessageFixer(){
+        return new ServerMessageFixer() {
+            @Override
+            public void onLoadGame(ChessGame game) {
+                currentGame = game;
+                System.out.println("\n=== Board Updated ===");
+                System.out.println("Board Loaded");
+            }
+
+            @Override
+            public void onNotification(String message) {
+
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+
+            }
+        };
     }
 
 }

@@ -1,4 +1,6 @@
 package client;
+import chess.ChessGame;
+
 
 import com.google.gson.Gson;
 import websocket.commands.GameCommandUser;
@@ -19,6 +21,8 @@ public class WebSocketFacade {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.sesh = container.connectToServer(this, uri);
     }
+
+
     @OnOpen
     public void  onOpen(Session session){
         System.out.println("WebSocket connected to server");
