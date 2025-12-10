@@ -149,11 +149,15 @@ public class Server {
         return s == null ? "" : s.replace("\"", "'");
     }
     private void doConnect(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
-        String username = "user";
+        String username = getUsername(command.getAuthToken());
 
         int gameID =command.getGameID();
         GameData gameData = dao.getGame(gameID);
         ChessGame game = gameData.game();
+        if(game == null){
+            sendError(ctx.session, "No Game :(");
+            return;
+        }
 
         connect.add(gameID, ctx.session);
         String loadGameJson = gson.toJson(new websocket.message.Loadgamemessages(game));
