@@ -1,4 +1,4 @@
-package websocket.message;
+package websocket.messages;
 
 public class ServerMessage {
     public enum ServerMessageType{

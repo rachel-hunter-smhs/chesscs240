@@ -1,7 +1,6 @@
 package server;
 
 import chess.ChessGame;
-import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dataaccess.DataAccessException;
@@ -14,9 +13,9 @@ import service.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import websocket.commands.CommandMakeMove;
-import websocket.message.*;
-import websocket.commands.GameCommandUser;
-import server.websocket.Connections;
+import websocket.commands.UserGameCommand;
+import websocket.messages.*;
+import websocket.commands.UserGameCommand;
 import org.eclipse.jetty.websocket.api.Session;
 
 
@@ -81,10 +80,10 @@ public class Server {
                     com.google.gson.JsonObject jsonObject = gson.fromJson(ctx.message(), com.google.gson.JsonObject.class);
                     String commandTypeStr = jsonObject.get("commandType").getAsString();
 
-                    GameCommandUser command = null;
+                    UserGameCommand command = null;
                     switch (commandTypeStr){
                         case "MAKE_MOVE" -> command = gson.fromJson(ctx.message(), CommandMakeMove.class);
-                        case "CONNECT", "LEAVE", "RESIGN" -> command = gson.fromJson(ctx.message(), GameCommandUser.class);
+                        case "CONNECT", "LEAVE", "RESIGN" -> command = gson.fromJson(ctx.message(), UserGameCommand.class);
                         default ->  {
                             ctx.send(gson.toJson(new ErrorMessage("Unknown command type")));
                         }
@@ -102,7 +101,7 @@ public class Server {
                     }
 
                 } catch (Exception e){
-                    String oopSJSon = gson.toJson(new websocket.message.ErrorMessage(e.getMessage()));
+                    String oopSJSon = gson.toJson(new websocket.messages.ErrorMessage(e.getMessage()));
                     ctx.send(oopSJSon);
                 }
             });
@@ -164,7 +163,7 @@ public class Server {
     private String safe(String s) {
         return s == null ? "" : s.replace("\"", "'");
     }
-    private void doConnect(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
+    private void doConnect(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command, Connections connect) throws Exception {
         String username = getUsername(command.getAuthToken());
 
         int gameID =command.getGameID();
@@ -176,13 +175,13 @@ public class Server {
         }
 
         connect.add(gameID, ctx.session);
-        String loadGameJson = gson.toJson(new websocket.message.Loadgamemessages(game));
+        String loadGameJson = gson.toJson(new websocket.messages.Loadgamemessages(game));
         ctx.send(loadGameJson);
-        String notify = gson.toJson(new websocket.message.NotificationMessage( username +" joined"));
+        String notify = gson.toJson(new websocket.messages.NotificationMessage( username +" joined"));
         connect.broadcast(gameID, notify, ctx.session);
 
     }
-    private void doMakeMove(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
+    private void doMakeMove(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command, Connections connect) throws Exception {
         String username = getUsername(command.getAuthToken());
 
         int gameID =command.getGameID();
@@ -236,7 +235,7 @@ public class Server {
         }
 
     }
-    private void doLeave(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
+    private void doLeave(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command, Connections connect) throws Exception {
         String username = getUsername(command.getAuthToken());
         int gameID =command.getGameID();
         GameData gameData = dao.getGame(gameID);
@@ -260,7 +259,7 @@ public class Server {
         String tellDaWorld = gson.toJson(new NotificationMessage(username + "left"));
         connect.broadcast(gameID, tellDaWorld, null);
     }
-    private void doResign (io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception{
+    private void doResign (io.javalin.websocket.WsMessageContext ctx, UserGameCommand command, Connections connect) throws Exception{
         String username = getUsername(command.getAuthToken());
         int gameID =command.getGameID();
         GameData gameData = dao.getGame(gameID);
@@ -279,7 +278,7 @@ public class Server {
     }
     private void sendError(Session sesh, String oops){
         try{
-            String oopsJson = gson.toJson(new websocket.message.ErrorMessage(oops));
+            String oopsJson = gson.toJson(new websocket.messages.ErrorMessage(oops));
             sesh.getRemote().sendString(oopsJson);
         } catch(Exception e){
             System.err.println("Failed to send error" + e.getMessage());

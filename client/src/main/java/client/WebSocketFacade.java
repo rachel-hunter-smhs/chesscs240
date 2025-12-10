@@ -1,22 +1,20 @@
 package client;
-import chess.ChessGame;
 
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
-import websocket.commands.GameCommandUser;
-import websocket.message.ErrorMessage;
-import websocket.message.Loadgamemessages;
-import websocket.message.NotificationMessage;
-import websocket.message.ServerMessage;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.Loadgamemessages;
+import websocket.messages.NotificationMessage;
 
 import java.net.URI;
 @ClientEndpoint
 public class WebSocketFacade {
     private Session sesh;
     private final Gson gson = new Gson();
-    private ServerMessageFixer fixer;
-    public WebSocketFacade(String url, ServerMessageFixer fixer) throws Exception{
+    private ServerMessageType fixer;
+    public WebSocketFacade(String url, ServerMessageType fixer) throws Exception{
         URI uri = new URI(url);
         this.fixer = fixer;
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -36,15 +34,15 @@ public class WebSocketFacade {
            switch (messageType){
                case "LOAD_GAME" -> {
                    Loadgamemessages load = gson.fromJson(message, Loadgamemessages.class);
-                   fixer.onLoadGame(load.getGame());
+                   fixer.LOAD_GAME(load.getGame());
                }
                case "NOTIFICATION" -> {
                    NotificationMessage note = gson.fromJson(message, NotificationMessage.class);
-                   fixer.onNotification(note.getNotification());
+                   fixer.NOTIFICATION(note.getNotification());
                }
                case "ERROR" -> {
                    ErrorMessage err = gson.fromJson(message, ErrorMessage.class);
-                   fixer.onError(err.getErrorMessage());
+                   fixer.ERROR(err.getErrorMessage());
                }
            }
 
@@ -58,7 +56,7 @@ public class WebSocketFacade {
         System.err.println("WebSocket error: " + throwable.getMessage());
     }
     public void connect(String authToken, int gameid) throws Exception{
-        GameCommandUser command = new GameCommandUser( GameCommandUser.CommandType.CONNECT,  authToken, gameid);
+        UserGameCommand command = new UserGameCommand( UserGameCommand.CommandType.CONNECT,  authToken, gameid);
         String json = gson.toJson(command);
         System.out.println("Sending connect: " + json);
         send(json);

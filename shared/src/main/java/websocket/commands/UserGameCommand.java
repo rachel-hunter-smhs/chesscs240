@@ -1,6 +1,6 @@
 package websocket.commands;
 
-public class GameCommandUser {
+public class UserGameCommand {
     public  enum  CommandType{
         CONNECT,
         MAKE_MOVE,
@@ -10,7 +10,7 @@ public class GameCommandUser {
     protected CommandType commandType;
     protected String authToken;
     protected Integer gameID;
-    public GameCommandUser(CommandType commandType, String authToken, Integer gameID){
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID){
         this.authToken = authToken;
         this.commandType = commandType;
         this.gameID = gameID;

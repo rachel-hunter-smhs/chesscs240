@@ -1,4 +1,4 @@
-package websocket.message;
+package websocket.messages;
 import chess.ChessGame;
 
 public class Loadgamemessages extends ServerMessage{

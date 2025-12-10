@@ -3,10 +3,10 @@ import chess.ChessGame;
 
 import java.util.Scanner;
 
-interface ServerMessageFixer{
-    void onLoadGame(ChessGame game);
-    void onNotification(String message);
-    void onError(String errorMessage);
+interface ServerMessageType{
+    void  LOAD_GAME(ChessGame game);
+    void NOTIFICATION(String message);
+    void ERROR(String errorMessage);
 }
 
 public class ChessClient {
@@ -235,14 +235,14 @@ public class ChessClient {
         server.joinGame(authToken, gameID, color);
         System.out.println("Joined game " + color);
         if (ws == null){
-            ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
+            ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageType());
         }
         ws.connect(authToken, gameID);
     }
     private void  testWebSocket(){
         try{
             if(ws == null){
-                ws =   new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
+                ws =   new WebSocketFacade("ws://localhost:8080/ws", createMessageType());
                 ws.connect(authToken, 1);
             }else {
                 System.out.println("already connected");
@@ -272,27 +272,27 @@ public class ChessClient {
         playerColor = ChessGame.TeamColor.WHITE;
         System.out.println("Hi Observer, FYI you are currently only observing");
         if (ws == null){
-            ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageFixer());
+            ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageType());
         }
         ws.connect(authToken, gameID);
     }
-    private ServerMessageFixer createMessageFixer(){
-        return new ServerMessageFixer() {
+    private ServerMessageType createMessageType(){
+        return new ServerMessageType() {
             @Override
-            public void onLoadGame(ChessGame game) {
+            public void  LOAD_GAME(ChessGame game) {
                 currentGame = game;
                 System.out.println("\n=== Board Updated ===");
                 BoardDrawer.drawBoard(game, playerColor);
             }
 
             @Override
-            public void onNotification(String message) {
+            public void NOTIFICATION(String message) {
                 System.out.println("\n[Notification]" + message);
 
             }
 
             @Override
-            public void onError(String errorMessage) {
+            public void ERROR(String errorMessage) {
                 System.out.println("\n[Error]" + errorMessage);
 
             }
