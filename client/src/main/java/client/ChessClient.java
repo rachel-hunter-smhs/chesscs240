@@ -32,7 +32,7 @@ public class ChessClient {
                 }
             } catch (Exception e){
                 System.out.println("Error: " + e.getMessage());
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
         System.out.println("Goodbye!");
