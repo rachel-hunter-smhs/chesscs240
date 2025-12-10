@@ -34,4 +34,31 @@ public class BoardDrawer {
         drawBorderRow(false);
         System.out.println();
     }
+    private static void drawBorderRow(boolean whiteView){
+        System.out.print(BORDER_COLOR + "   ");
+        if(whiteView){
+            for(char c = 'a'; c <= 'h'; c++){
+                System.out.print(" " + c + " ");
+            }
+        } else{
+            for(char c = 'h'; c >= 'a'; c--){
+                System.out.print(" " + c + " ");
+            }
+        }
+        System.out.print("   "+ RESET_BG_COLOR);
+        System.out.println();
+
+    }
+    private static void drawRow(ChessBoard board, int r, boolean whiteView){
+        System.out.print(BORDER_COLOR + " " + r + " " + RESET_BG_COLOR);
+        if (whiteView){
+            for(int c = 1; c <=8; c++){
+                drawSquare(board, r, c);
+            }
+        } else{
+            for(int c = 8; c <=1; c++){
+                drawSquare(board, r, c);
+            }
+        }
+    }
 }
