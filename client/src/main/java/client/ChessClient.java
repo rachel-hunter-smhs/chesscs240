@@ -283,11 +283,13 @@ public class ChessClient {
 
             @Override
             public void onNotification(String message) {
+                System.out.println("\n[Notification]" + message);
 
             }
 
             @Override
             public void onError(String errorMessage) {
+                System.out.println("\n[Error]" + errorMessage);
 
             }
         };
