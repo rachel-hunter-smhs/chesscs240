@@ -1,5 +1,6 @@
 package client;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import model.AuthData;
 
 import java.net.URI;
@@ -10,7 +11,7 @@ import java.net.http.HttpResponse;
 public class ServerFacade {
     private final String serverLink;
     private final HttpClient httpClient;
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().serializeNulls().create();
 
     public ServerFacade(int port) {
         this.serverLink = "http://localhost:" + port;
@@ -102,8 +103,17 @@ public class ServerFacade {
     public record LoginRequest(String username, String password) {}
 
     public void joinGame(String authToken, int gameID, String playerColor) throws Exception {
-        var req = new JoinGameRequest(playerColor, gameID);
-        System.out.println("Joining game with" + gson.toJson(req));
+        Object req;
+        if(playerColor == null){
+            req = new ObserveGameRequest(gameID);
+            System.out.println("Joining game with" + gson.toJson(req));
+        }
+        else{
+            req = new JoinGameRequest(playerColor, gameID);
+            System.out.println("Joining game with" + gson.toJson(req));
+        }
+
+
         sendRequest("PUT", "/game", req, null, authToken);
     }
 
@@ -112,6 +122,7 @@ public class ServerFacade {
     public record CreateGameResponse(int gameID){}
 
     public record JoinGameRequest(String playerColor, int gameID) {}
+    public record ObserveGameRequest(int gameID){}
 
     public record GameData(int gameID, String whiteUsername, String blackUsername, String gameName) {}
     public record GameListResult(GameData[] games) {}

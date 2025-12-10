@@ -165,7 +165,7 @@ public class ChessClient {
             return;
         }
 
-        // FIX: Build game name from all tokens after "create"
+
         StringBuilder gameName = new StringBuilder();
         for (int i = 1; i < tokens.length; i++){
             if (i > 1) {
@@ -199,6 +199,10 @@ public class ChessClient {
             System.out.println("play rewuires play <game number> <WHITE|BLACK>");
             return;
         }
+        if (gameList == null){
+            System.out.println("Please run 'list' first to see available games");
+            return;
+        }
         int gameNumber = Integer.parseInt(tokens[1]);
         if(gameNumber <1 || gameNumber> gameList.length){
             System.out.println("Invalid game number");
@@ -219,6 +223,10 @@ public class ChessClient {
            System.out.println("needed : observe <game num>");
            return;
        }
+        if (gameList == null){
+            System.out.println("Please run 'list' first to see available games");
+            return;
+        }
        int gameNum = Integer.parseInt(tokens[1]);
        if(gameNum <1 || gameNum > gameList.length){
            System.out.println("Incorrect Game num");
