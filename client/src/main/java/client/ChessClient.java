@@ -215,6 +215,17 @@ public class ChessClient {
     }
 
     private void observeGame(String[] tokens) throws Exception{
-        System.out.println("Observe game");
+       if(tokens.length != 2){
+           System.out.println("needed : observe <game num>");
+           return;
+       }
+       int gameNum = Integer.parseInt(tokens[1]);
+       if(gameNum <1 || gameNum > gameList.length){
+           System.out.println("Incorrect Game num");
+           return;
+       }
+       int gameID = gameList[gameNum -1].gameID();
+       server.joinGame(authToken, gameID, null);
+       System.out.println("You are currently observing the game");
     }
 }
