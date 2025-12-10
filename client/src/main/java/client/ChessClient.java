@@ -107,7 +107,7 @@ public class ChessClient {
             }
             default -> {
                 System.out.println("Unknown command. Type 'help' for available commands");
-                yield true;
+                yield false;
             }
         };
     }
@@ -195,7 +195,23 @@ public class ChessClient {
     }
 
     private void playGame(String[] tokens) throws Exception{
-        System.out.println("Play game");
+        if(tokens.length != 3){
+            System.out.println("play rewuires play <game number> <WHITE|BLACK>");
+            return;
+        }
+        int gameNumber = Integer.parseInt(tokens[1]);
+        if(gameNumber <1 || gameNumber> gameList.length){
+            System.out.println("Invalid game number");
+            return;
+        }
+        int gameID = gameList[gameNumber -1].gameID();
+        String color = tokens[2].toUpperCase();
+        if (!color.equals("WHITE") && !color.equals("BLACK")){
+            System.out.println("WHITE OR BLACK ONLY");
+            return;
+        }
+        server.joinGame(authToken, gameID, color);
+        System.out.println("Joined game " + color);
     }
 
     private void observeGame(String[] tokens) throws Exception{
