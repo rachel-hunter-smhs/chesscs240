@@ -55,6 +55,25 @@ public class Server {
 
     }
     public int run(int wantedPort) {
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(ctx -> {
+                System.out.println("WebSocket connected: " + ctx.session.getRemoteAddress());
+            });
+
+            ws.onMessage(ctx -> {
+                System.out.println("Received message: " + ctx.message());
+                ctx.send("Echo: " + ctx.message());
+            });
+
+            ws.onClose(ctx -> {
+                System.out.println("WebSocket closed");
+            });
+
+            ws.onError(ctx -> {
+                System.err.println("WebSocket error: " + (ctx.error() != null ? ctx.error().getMessage() : "unknown"));
+            });
+        });
+
         javalin.start(wantedPort);
         return javalin.port();
     }
