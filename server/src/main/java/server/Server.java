@@ -179,6 +179,13 @@ public class Server {
             System.err.println("Failed to send error" + e.getMessage());
         }
     }
+    private String getUsername (String authToken) throws Exception{
+        var authData = dao.getAuth(authToken);
+        if(authData == null){
+            throw  new Exception("Invalid");
+        }
+        return authData.username();
+    }
 
 
 
