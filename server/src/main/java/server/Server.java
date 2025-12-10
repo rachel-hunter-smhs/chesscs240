@@ -246,8 +246,22 @@ public class Server {
         String tellDaWorld = gson.toJson(new NotificationMessage(username + "left"));
         connect.broadcast(gameID, tellDaWorld, null);
     }
-    private void doResign (io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect){
-        sendError(ctx.session, "RESIGN not implemented");
+    private void doResign (io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception{
+        String username = getUsername(command.getAuthToken());
+        int gameID =command.getGameID();
+        GameData gameData = dao.getGame(gameID);
+        ChessGame game = gameData.game();
+        if(game == null){
+            sendError(ctx.session, "No Game :(");
+            return;
+        }
+        if(!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())){
+            sendError(ctx.session, "you are not a player :P");
+            return;
+        }
+        String Quitter = gson.toJson(new NotificationMessage(username + " quit. GAME OVER...."));
+        connect.broadcast(gameID, Quitter, null);
+
     }
     private void sendError(Session sesh, String oops){
         try{
