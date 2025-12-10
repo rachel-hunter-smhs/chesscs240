@@ -9,8 +9,10 @@ import java.net.URI;
 public class WebSocketFacade {
     private Session sesh;
     private final Gson gson = new Gson();
-    public WebSocketFacade(String url) throws Exception{
+    private ServerMessageFixer fixer;
+    public WebSocketFacade(String url, ServerMessageFixer fixer) throws Exception{
         URI uri = new URI(url);
+        this.fixer = fixer;
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.sesh = container.connectToServer(this, uri);
     }
