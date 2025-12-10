@@ -221,6 +221,10 @@ public class ChessClient {
         }
         server.joinGame(authToken, gameID, color);
         System.out.println("Joined game " + color);
+        if (ws == null){
+            ws = new WebSocketFacade("ws://localhost:8080/ws");
+        }
+        ws.connect(authToken, gameID);
     }
     private void  testWebSocket(){
         try{
@@ -253,6 +257,10 @@ public class ChessClient {
         int gameID = gameList[gameNum - 1].gameID();
         server.joinGame(authToken, gameID, null);
         System.out.println("You are currently observing the game");
+        if (ws == null){
+            ws = new WebSocketFacade("ws://localhost:8080/ws");
+        }
+        ws.connect(authToken, gameID);
     }
 
 }

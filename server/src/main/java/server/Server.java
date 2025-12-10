@@ -25,6 +25,7 @@ public class Server {
     private final Gson gson = new Gson();
     private final Javalin javalin;
     private  final Connections connect = new Connections();
+    private final MySQLDataAccess dao = new MySQLDataAccess();
     private record NameOnly(String gameName) {}
     private record JoinBody(String playerColor, int gameID) {}
 
@@ -86,7 +87,7 @@ public class Server {
                    }
                 } catch (Exception e){
                     String oopSJSon = gson.toJson(new websocket.message.ErrorMessage(e.getMessage()));
-                    ctx.send("Error " + e.getMessage());
+                    ctx.send(oopSJSon);
                 }
             });
 
@@ -150,7 +151,6 @@ public class Server {
     private void doConnect(io.javalin.websocket.WsMessageContext ctx, GameCommandUser command, Connections connect) throws Exception {
         String username = "user";
 
-        var dao = new MySQLDataAccess();
         int gameID =command.getGameID();
         GameData gameData = dao.getGame(gameID);
         ChessGame game = gameData.game();
@@ -179,6 +179,7 @@ public class Server {
             System.err.println("Failed to send error" + e.getMessage());
         }
     }
+
 
 
 
