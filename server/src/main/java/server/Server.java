@@ -78,15 +78,29 @@ public class Server {
                 System.out.println("Received message: " + ctx.message());
 
                 try {
-                    GameCommandUser command = gson.fromJson(ctx.message(), GameCommandUser.class);
-                   switch (command.getCommandType()){
-                       case CONNECT ->  doConnect(ctx, command, connect);
-                       case MAKE_MOVE ->  doMakeMove(ctx, command, connect);
-                       case LEAVE->  doLeave(ctx, command, connect);
-                       case RESIGN ->  doResign(ctx, command, connect);
+                    com.google.gson.JsonObject jsonObject = gson.fromJson(ctx.message(), com.google.gson.JsonObject.class);
+                    String commandTypeStr = jsonObject.get("commandType").getAsString();
+
+                    GameCommandUser command = null;
+                    switch (commandTypeStr){
+                        case "MAKE_MOVE" -> command = gson.fromJson(ctx.message(), CommandMakeMove.class);
+                        case "CONNECT", "LEAVE", "RESIGN" -> command = gson.fromJson(ctx.message(), GameCommandUser.class);
+                        default ->  {
+                            ctx.send(gson.toJson(new ErrorMessage("Unknown command type")));
+                        }
+                    }
+                    if(command != null){
+                        switch (command.getCommandType()){
+                            case CONNECT ->  doConnect(ctx, command, connect);
+                            case MAKE_MOVE ->  doMakeMove(ctx, command, connect);
+                            case LEAVE->  doLeave(ctx, command, connect);
+                            case RESIGN ->  doResign(ctx, command, connect);
 
 
-                   }
+                        }
+
+                    }
+
                 } catch (Exception e){
                     String oopSJSon = gson.toJson(new websocket.message.ErrorMessage(e.getMessage()));
                     ctx.send(oopSJSon);
