@@ -16,9 +16,8 @@ import websocket.commands.CommandMakeMove;
 import websocket.commands.UserGameCommand;
 import websocket.messages.*;
 import org.eclipse.jetty.websocket.api.Session;
-
-
-
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Server {
@@ -28,6 +27,8 @@ public class Server {
     private final MySQLDataAccess dao = new MySQLDataAccess();
     private record NameOnly(String gameName) {}
     private record JoinBody(String playerColor, int gameID) {}
+    private final Set<Integer> resignedGames = ConcurrentHashMap.newKeySet();
+
 
     public Server(){
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -190,13 +191,17 @@ public class Server {
             sendError(ctx.session, "No Game :(");
             return;
         }
-        //ChessGame game = gameData.game();
+
        if(!(command instanceof CommandMakeMove)){
            sendError(ctx.session, "Invalid command");
            return;
        }
        CommandMakeMove moveGo = (CommandMakeMove) command;
        chess.ChessMove move = moveGo.getChessMove();
+        if (move == null) {
+            sendError(ctx.session, "Move was null");
+            return;
+        }
         ChessGame.TeamColor playerColor = null;
         if(username.equals(gameData.whiteUsername())){
             playerColor = ChessGame.TeamColor.WHITE;
@@ -243,15 +248,14 @@ public class Server {
             sendError(ctx.session, "No Game :(");
             return;
         }
-        String White  = gameData.whiteUsername();
-        String Black = gameData.blackUsername();
-        if (username.equals(White)){
-            White = null;
-        } else if (username.equals(Black)) {
-            Black = null;
-
+        String white = gameData.whiteUsername();
+        String black = gameData.blackUsername();
+        if (username.equals(white)) {
+            white = null;
+        } else if (username.equals(black)) {
+            black = null;
         }
-        GameData update = new GameData(gameData.gameID(), White, Black, gameData.gameName(), gameData.game());
+        GameData update = new GameData(gameData.gameID(), white, black, gameData.gameName(), gameData.game());
         dao.saveGame(update);
         connect.remove(gameID, ctx.session);
 
@@ -267,10 +271,18 @@ public class Server {
             sendError(ctx.session, "No Game :(");
             return;
         }
-        if(!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())){
+        boolean isPlayer = username.equals(gameData.whiteUsername()) || username.equals(gameData.blackUsername());
+        if(!isPlayer){
             sendError(ctx.session, "you are not a player :P");
             return;
+
         }
+        if (resignedGames.contains(gameID)) {
+            sendError(ctx.session, "Game already over.");
+            return;
+        }
+        resignedGames.add(gameID);
+
         String Quitter = gson.toJson(new NotificationMessage(username + " quit. GAME OVER...."));
         connect.broadcast(gameID, Quitter, null);
 
