@@ -7,6 +7,8 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
+import chess.ChessMove;
+import websocket.commands.CommandMakeMove;
 
 import java.net.URI;
 @ClientEndpoint
@@ -68,5 +70,10 @@ public class WebSocketFacade {
 
     public void close() throws Exception {
         sesh.close();
+    }
+    public void makeMove(String authToken, int gameId, chess.ChessMove move) throws Exception{
+        CommandMakeMove command = new CommandMakeMove(authToken, gameId, move);
+        String json = gson.toJson(command);
+        send(json);
     }
 }

@@ -2,6 +2,7 @@ package client;
 import chess.ChessGame;
 
 import java.util.Scanner;
+import chess.ChessPosition;
 
 interface ServerMessageType{
     void  LOAD_GAME(ChessGame game);
@@ -17,6 +18,7 @@ public class ChessClient {
     private WebSocketFacade ws = null;
     private chess.ChessGame currentGame = null;
     private ChessGame.TeamColor playerColor =null;
+    private int currentGameId = 0;
 
     private enum State{
         PRELOGIN,
@@ -121,6 +123,10 @@ public class ChessClient {
                 testWebSocket();
                 yield  false;
             }
+            case "move" -> {
+                makeMove(tokens);
+                yield false;
+            }
             default -> {
                 System.out.println("Unknown command. Type 'help' for available commands");
                 yield false;
@@ -144,6 +150,7 @@ public class ChessClient {
         System.out.println(" observe <game number>: Observes game");
         System.out.println(" logout : logs out");
         System.out.println(" help: prints this message");
+        System.out.println(" move <start> <end> : Makes a move (e.g., move e2 e4)");
     }
 
     private void register(String[] tokens) throws Exception{
@@ -172,6 +179,14 @@ public class ChessClient {
         server.logout(authToken);
         authToken = null;
         state = State.PRELOGIN;
+        if(ws != null){
+            try{
+                ws.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            ws = null;
+        }
         System.out.println("Successfully logged out");
     }
 
@@ -191,7 +206,7 @@ public class ChessClient {
         }
 
         var response = server.createGame(authToken, gameName.toString());
-        System.out.println("Created Game " + gameName + " (ID" + response.gameID() + ")");
+        System.out.println("Created Game " + gameName);
     }
 
     private void listGames() throws Exception{
@@ -221,11 +236,13 @@ public class ChessClient {
             return;
         }
         int gameNumber = Integer.parseInt(tokens[1]);
+
         if(gameNumber <1 || gameNumber> gameList.length){
             System.out.println("Invalid game number");
             return;
         }
         int gameID = gameList[gameNumber -1].gameID();
+        currentGameId = gameID;
         String color = tokens[2].toUpperCase();
         if (!color.equals("WHITE") && !color.equals("BLACK")){
             System.out.println("WHITE OR BLACK ONLY");
@@ -275,6 +292,44 @@ public class ChessClient {
             ws = new WebSocketFacade("ws://localhost:8080/ws", createMessageType());
         }
         ws.connect(authToken, gameID);
+    }
+    private void makeMove(String[] tokens) throws Exception{
+        if(tokens.length != 3){
+            System.out.println("move requires: move <start> <end> (e.g., move e2 e4)");
+            return;
+        }
+        if(ws == null || currentGameId == 0){
+            System.out.println("You must join a game first");
+            return;
+        }
+
+        ChessPosition start = parsePosition(tokens[1]);
+        ChessPosition end = parsePosition(tokens[2]);
+
+        if(start == null || end == null){
+            System.out.println("Invalid position format. Use format like 'e2' or 'a7'");
+            return;
+        }
+
+        chess.ChessMove move = new chess.ChessMove(start, end, null);
+        ws.makeMove(authToken, currentGameId, move);
+    }
+
+    private ChessPosition parsePosition(String pos){
+        if(pos.length() != 2){
+            return null;
+        }
+        char col = pos.charAt(0);
+        char row = pos.charAt(1);
+
+        if(col < 'a' || col > 'h' || row < '1' || row > '8'){
+            return null;
+        }
+
+        int column = col - 'a' + 1;
+        int rowNum = row - '0';
+
+        return new ChessPosition(rowNum, column);
     }
     private ServerMessageType createMessageType(){
         return new ServerMessageType() {
