@@ -52,6 +52,7 @@ public class BoardDrawer {
         System.out.println();
     }
 
+
     private static void drawRow(ChessBoard board, int r, boolean whiteView){
         System.out.print(BORDER_COLOR + " " + r + " " + RESET_BG_COLOR);
         if (whiteView){

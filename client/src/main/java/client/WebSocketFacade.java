@@ -64,6 +64,7 @@ public class WebSocketFacade {
         send(json);
     }
 
+
     public void send(String message) throws Exception {
         sesh.getBasicRemote().sendText(message);
     }

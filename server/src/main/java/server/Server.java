@@ -151,6 +151,7 @@ public class Server {
         }
     }
 
+
     private void mapped(Context ctx, String m) {
         switch (m) {
             case "bad request" -> ctx.status(400);

@@ -5,6 +5,7 @@ import java.util.Scanner;
 import chess.ChessPosition;
 
 interface ServerMessageType{
+
     void  LOAD_GAME(ChessGame game);
     void NOTIFICATION(String message);
     void ERROR(String errorMessage);
